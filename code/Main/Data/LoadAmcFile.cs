@@ -9,35 +9,35 @@ namespace Main.Data
 {
     class LoadAmcFile
     {
-        public string[] pointnames;
-        public List<double[]> vectorlist;
-        public LoadAmcFile(string path, string[] pointnames)
+        public List<double> data;
+        public LoadAmcFile(string fileName, string[] pointnames)
         {
-            this.pointnames = pointnames;
-            this.vectorlist = new List<double[]>();
-            var lines = File.ReadAllLines(path);
-            List<double> vector = new List<double>();
-
+            int numBones = pointnames.Length;
+            string[] lines = File.ReadAllLines(fileName);
+            data = new List<double>();
+            String[] temp;
             foreach (var line in lines)
             {
-                String[] temp = line.Split(' ');
-                for (int n = 0; n < this.pointnames.Length; n++)
-                //Lặp trong mảng pointnames[]
+                temp = line.Split(' ');
+                for (int n = 0; n < numBones; n++)
                 {
-                    if (line.StartsWith(this.pointnames[n]))
+                    if (line.StartsWith(pointnames[n]))
                     {
                         int length = temp.Length;
-                        for (int j = 1; j < length; j++)
-                            vector.Add(double.Parse(temp[j]));
-                        if (n == this.pointnames.Length - 1)
+                        int j;
+                        for (j = 1; j < length; j++)
                         {
-                            vectorlist.Add(vector.ToArray());
-                            vector = new List<double>();
+                            data.Add(double.Parse(temp[j]));
+                        }
+                        // if dof has less then 3 value, set 0 for the rest
+                        for (int k = j; k < 4; k++)
+                        {
+                            data.Add(0.00);
                         }
                         break;
                     }
-                }
-            }
+                } // end for bones
+            }// end for lines
         }
     }
 }
