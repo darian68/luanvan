@@ -12,11 +12,14 @@ using Accord.Statistics.Kernels;
 using Accord.MachineLearning.VectorMachines;
 using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Math;
+using System.IO;
+using System.Reflection;
 
 namespace Main
 {
     public partial class MainForm : Form
     {
+        string outPutDirectory = new Uri (Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase)).LocalPath;
         public MainForm()
         {
             InitializeComponent();
@@ -25,19 +28,20 @@ namespace Main
         private void btnSVM_Click(object sender, EventArgs e)
         {
             txtOutput.Text = "";
-            string pathRun = "D:\\acclaim\\training\\run";
-            string pathWalk = "D:\\acclaim\\training\\walk";
+            string pathRun = Path.Combine(outPutDirectory, "Acclaim\\training\\run");
+            string pathWalk = Path.Combine(outPutDirectory, "Acclaim\\training\\walk");
             //string pathJump = "D:\\acclaim\\training\\jump";
             //string pathDance = "D:\\acclaim\\training\\dance";
             string[] boneNames = new string[] { "thorax", "head", "rhand", "lhand", "rfemur", "lfemur", "rfoot", "lfoot" };
             //
             //string[] boneNames = new string[] { "root" };
-            LoadAmcFolder amcRun = new LoadAmcFolder(pathRun, boneNames);
-            LoadAmcFolder amcWalk = new LoadAmcFolder(pathWalk, boneNames);
+
+            LoadAmcFolder amcRunFolder = new LoadAmcFolder(pathRun, boneNames);
+            LoadAmcFolder amcWalkFolder = new LoadAmcFolder(pathWalk, boneNames);
             //LoadAmcFolder amcJump = new LoadAmcFolder(pathJump, boneNames);
             //LoadAmcFolder amcDance = new LoadAmcFolder(pathDance, boneNames);
-            double[][] runInput = amcRun.data.ToArray();
-            double[][] walkInput = amcWalk.data.ToArray();
+            double[][] runInput = amcRunFolder.readDataAs2DVetor();
+            double[][] walkInput = amcWalkFolder.readDataAs2DVetor();
             //double[][] jumpInput = amcJump.data.ToArray();
             //double[][] danceInput = amcDance.data.ToArray();
             List<double[]> inputs = new List<double[]>();
@@ -54,8 +58,8 @@ namespace Main
                 inputs.Add(walkInput[i]);
                 outputs.Add(Activity.WALK);
             }
-            // Create a new Linear kernel with length = 3 = dof
-            IKernel kernel = new DynamicTimeWarping(length: 6);
+            // Create a new Linear kernel with length = (3 * numBones)
+            IKernel kernel = new DynamicTimeWarping(length: 24);
             // Create a new Multi-class Support Vector Machine with 1 input,
             //  using the linear kernel and for four disjoint classes.
             var machine = new MulticlassSupportVectorMachine(0, kernel, 2);
@@ -67,36 +71,36 @@ namespace Main
                 new SequentialMinimalOptimization(svm, classInputs, classOutputs);
             // Run the learning algorithm
             double error = teacher.Run();
-            txtOutput.Text = "Finish training!";
-            string pathPatternRun = "D:\\acclaim\\pattern\\run\\16_55.amc"; // run 0
+            txtOutput.Text = "Finished training!";
+            string pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_55.amc");
             LoadAmcFile runFile = new LoadAmcFile(pathPatternRun, boneNames);
             int result = machine.Compute(runFile.data.ToArray());
             txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = "D:\\acclaim\\pattern\\walk\\08_01.amc";// walk 1
+            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_01.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.data.ToArray());
             txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = "D:\\acclaim\\pattern\\walk\\08_02.amc"; // walk 1
+            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_03.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.data.ToArray());
             txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = "D:\\acclaim\\pattern\\walk\\08_01.amc"; // walk 1
+            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\09_01.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.data.ToArray());
             txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = "D:\\acclaim\\pattern\\run\\09_03.amc"; // run 0
+            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\09_02.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.data.ToArray());
             txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = "D:\\acclaim\\pattern\\run\\35_17.amc"; // run 0
+            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_35.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.data.ToArray());
             txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = "D:\\acclaim\\pattern\\run\\35_18.amc"; // run 0
+            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_55.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.data.ToArray());
             txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = "D:\\acclaim\\pattern\\run\\35_19.amc"; // run 0
+            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\08_03.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.data.ToArray());
             txtOutput.Text += "\nResult Class: " + result;

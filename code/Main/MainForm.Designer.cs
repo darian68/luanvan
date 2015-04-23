@@ -44,9 +44,9 @@
             // 
             // txtOutput
             // 
-            this.txtOutput.Location = new System.Drawing.Point(101, 100);
+            this.txtOutput.Location = new System.Drawing.Point(103, 120);
             this.txtOutput.Name = "txtOutput";
-            this.txtOutput.Size = new System.Drawing.Size(421, 96);
+            this.txtOutput.Size = new System.Drawing.Size(421, 232);
             this.txtOutput.TabIndex = 1;
             this.txtOutput.Text = "";
             // 
