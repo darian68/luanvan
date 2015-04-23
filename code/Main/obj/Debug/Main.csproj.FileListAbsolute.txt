@@ -105,3 +105,4 @@ C:\GIT\luanvan\code\Main\bin\Debug\Accord.Statistics.pdb
 C:\GIT\luanvan\code\Main\bin\Debug\Accord.Statistics.xml
 C:\GIT\luanvan\code\Main\obj\Debug\Main.exe
 C:\GIT\luanvan\code\Main\obj\Debug\Main.pdb
+C:\GIT\luanvan\code\Main\obj\Debug\Main.csprojResolveAssemblyReference.cache

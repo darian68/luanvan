@@ -14,6 +14,7 @@ using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Math;
 using System.IO;
 using System.Reflection;
+using Main.FeatureExtraction;
 
 namespace Main
 {
@@ -40,8 +41,8 @@ namespace Main
             LoadAmcFolder amcWalkFolder = new LoadAmcFolder(pathWalk, boneNames);
             //LoadAmcFolder amcJump = new LoadAmcFolder(pathJump, boneNames);
             //LoadAmcFolder amcDance = new LoadAmcFolder(pathDance, boneNames);
-            double[][] runInput = amcRunFolder.readDataAs2DVetor();
-            double[][] walkInput = amcWalkFolder.readDataAs2DVetor();
+            double[][] runInput = new PCA().transform(amcRunFolder.readDataAs2DVetor());
+            double[][] walkInput = new PCA().transform(amcWalkFolder.readDataAs2DVetor());
             //double[][] jumpInput = amcJump.data.ToArray();
             //double[][] danceInput = amcDance.data.ToArray();
             List<double[]> inputs = new List<double[]>();

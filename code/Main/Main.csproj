@@ -52,6 +52,7 @@
     <Compile Include="Data\Activity.cs" />
     <Compile Include="Data\LoadAmcFile.cs" />
     <Compile Include="Data\LoadAmcFolder.cs" />
+    <Compile Include="FeatureAnalysis\PCA.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
