@@ -53,6 +53,9 @@ D:\000-Thesis\01-NewGIT\code\Main\obj\Debug\Main.Properties.Resources.resources
 D:\000-Thesis\01-NewGIT\code\Main\obj\Debug\Main.csproj.GenerateResource.Cache
 D:\000-Thesis\01-NewGIT\code\Main\obj\Debug\Main.exe
 D:\000-Thesis\01-NewGIT\code\Main\obj\Debug\Main.pdb
+C:\GIT\luanvan\code\Main\obj\Debug\Main.MainForm.resources
+C:\GIT\luanvan\code\Main\obj\Debug\Main.Properties.Resources.resources
+C:\GIT\luanvan\code\Main\obj\Debug\Main.csproj.GenerateResource.Cache
 C:\GIT\luanvan\code\Main\bin\Debug\Acclaim\pattern\07_01.amc
 C:\GIT\luanvan\code\Main\bin\Debug\Acclaim\pattern\07_03.amc
 C:\GIT\luanvan\code\Main\bin\Debug\Acclaim\pattern\08_03.amc
@@ -100,9 +103,5 @@ C:\GIT\luanvan\code\Main\bin\Debug\Accord.Math.pdb
 C:\GIT\luanvan\code\Main\bin\Debug\Accord.Math.xml
 C:\GIT\luanvan\code\Main\bin\Debug\Accord.Statistics.pdb
 C:\GIT\luanvan\code\Main\bin\Debug\Accord.Statistics.xml
-C:\GIT\luanvan\code\Main\obj\Debug\Main.MainForm.resources
-C:\GIT\luanvan\code\Main\obj\Debug\Main.Properties.Resources.resources
-C:\GIT\luanvan\code\Main\obj\Debug\Main.csproj.GenerateResource.Cache
 C:\GIT\luanvan\code\Main\obj\Debug\Main.exe
 C:\GIT\luanvan\code\Main\obj\Debug\Main.pdb
-C:\GIT\luanvan\code\Main\obj\Debug\Main.csprojResolveAssemblyReference.cache
