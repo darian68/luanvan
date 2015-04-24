@@ -83,6 +83,9 @@
     <None Include="Acclaim\pattern\08_03.amc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Acclaim\pattern\08_06.amc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Acclaim\pattern\09_01.amc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -20,7 +20,7 @@ namespace Main.FeatureExtraction
             // Compute the Principal Component Analysis
             pca.Compute();
             // Creates a projection considering 80% of the information
-            return pca.Transform(sourceMatrix, 2);
+            return pca.Transform(sourceMatrix, 24);
         }
     }
 }

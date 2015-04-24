@@ -33,7 +33,9 @@ namespace Main
             string pathWalk = Path.Combine(outPutDirectory, "Acclaim\\training\\walk");
             //string pathJump = "D:\\acclaim\\training\\jump";
             //string pathDance = "D:\\acclaim\\training\\dance";
-            string[] boneNames = new string[] { "thorax", "head", "rhand", "lhand", "rfemur", "lfemur", "rfoot", "lfoot" };
+            string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head" };
+            //string[] boneNames = new string[] { "thorax", "head", "rhand", "lhand", "rfemur", "lfemur", "rfoot", "lfoot" };
+            //string[] boneNames = new string[] {"root"};
             //
             //string[] boneNames = new string[] { "root" };
 
@@ -41,8 +43,8 @@ namespace Main
             LoadAmcFolder amcWalkFolder = new LoadAmcFolder(pathWalk, boneNames);
             //LoadAmcFolder amcJump = new LoadAmcFolder(pathJump, boneNames);
             //LoadAmcFolder amcDance = new LoadAmcFolder(pathDance, boneNames);
-            double[][] runInput = new PCA().transform(amcRunFolder.readDataAs2DVetor());
-            double[][] walkInput = new PCA().transform(amcWalkFolder.readDataAs2DVetor());
+            double[][] runInput = amcRunFolder.readDataAs2DVetor();
+            double[][] walkInput = amcWalkFolder.readDataAs2DVetor();
             //double[][] jumpInput = amcJump.data.ToArray();
             //double[][] danceInput = amcDance.data.ToArray();
             List<double[]> inputs = new List<double[]>();
@@ -77,14 +79,6 @@ namespace Main
             LoadAmcFile runFile = new LoadAmcFile(pathPatternRun, boneNames);
             int result = machine.Compute(runFile.readDataAsVetor());
             txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_01.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(runFile.readDataAsVetor());
-            txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_03.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(runFile.readDataAsVetor());
-            txtOutput.Text += "\nResult Class: " + result;
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\09_01.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.readDataAsVetor());
@@ -97,11 +91,19 @@ namespace Main
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.readDataAsVetor());
             txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_55.amc");
+            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\08_06.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.readDataAsVetor());
             txtOutput.Text += "\nResult Class: " + result;
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\08_03.amc");
+            runFile = new LoadAmcFile(pathPatternRun, boneNames);
+            result = machine.Compute(runFile.readDataAsVetor());
+            txtOutput.Text += "\nResult Class: " + result;
+            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_01.amc");
+            runFile = new LoadAmcFile(pathPatternRun, boneNames);
+            result = machine.Compute(runFile.readDataAsVetor());
+            txtOutput.Text += "\nResult Class: " + result;
+            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_03.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.readDataAsVetor());
             txtOutput.Text += "\nResult Class: " + result;
