@@ -15,6 +15,8 @@ using Accord.Math;
 using System.IO;
 using System.Reflection;
 using Main.FeatureExtraction;
+using Accord.Statistics.Models.Markov;
+using Accord.Statistics.Models.Markov.Learning;
 
 namespace Main
 {
@@ -33,7 +35,17 @@ namespace Main
             string pathWalk = Path.Combine(outPutDirectory, "Acclaim\\training\\walk");
             //string pathJump = "D:\\acclaim\\training\\jump";
             //string pathDance = "D:\\acclaim\\training\\dance";
-            string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head" };
+            // 23 bones
+            string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur", "rradius", "lradius", "rtibia", "ltibia", "lwrist", "rwrist", "lhand", "rhand", "lfoot", "rfoot" };
+            // 13 bones
+            //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur"};
+            // 7 bones
+            //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head"};
+            // 4 bones
+            //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax"};
+            // 3 bones
+            //string[] boneNames = new string[] { "root", "lowerback", "upperback"};
+            //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head" };
             //string[] boneNames = new string[] { "thorax", "head", "rhand", "lhand", "rfemur", "lfemur", "rfoot", "lfoot" };
             //string[] boneNames = new string[] {"root"};
             //
@@ -61,8 +73,8 @@ namespace Main
                 inputs.Add(walkInput[i]);
                 outputs.Add(Activity.WALK);
             }
-            // Create a new Linear kernel with length = (3 * numBones)
-            IKernel kernel = new DynamicTimeWarping(length: 24);
+            // Create a new Linear kernel with length = (3 * (boneNames.Length + 1(if have root)) )
+            IKernel kernel = new DynamicTimeWarping(length: 3 * (boneNames.Length + 1)); 
             // Create a new Multi-class Support Vector Machine with 1 input,
             //  using the linear kernel and for four disjoint classes.
             var machine = new MulticlassSupportVectorMachine(0, kernel, 2);
@@ -107,6 +119,64 @@ namespace Main
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.readDataAsVetor());
             txtOutput.Text += "\nResult Class: " + result;
+        }
+
+        private void btnHMM_Click(object sender, EventArgs e)
+        {
+            /*
+            txtOutput.Text = "";
+            string pathRun = Path.Combine(outPutDirectory, "Acclaim\\training\\run");
+            string pathWalk = Path.Combine(outPutDirectory, "Acclaim\\training\\walk");
+            // 23 bones
+            string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur", "rradius", "lradius", "rtibia", "ltibia", "lwrist", "rwrist", "lhand", "rhand", "lfoot", "rfoot" };
+            LoadAmcFolder amcRunFolder = new LoadAmcFolder(pathRun, boneNames);
+            LoadAmcFolder amcWalkFolder = new LoadAmcFolder(pathWalk, boneNames);
+            //LoadAmcFolder amcJump = new LoadAmcFolder(pathJump, boneNames);
+            //LoadAmcFolder amcDance = new LoadAmcFolder(pathDance, boneNames);
+            double[][] runInput = amcRunFolder.readDataAs2DVetor();
+            double[][] walkInput = amcWalkFolder.readDataAs2DVetor();
+            //double[][] jumpInput = amcJump.data.ToArray();
+            //double[][] danceInput = amcDance.data.ToArray();
+            List<double[]> inputs = new List<double[]>();
+            List<int> outputs = new List<int>();
+            int size = runInput.Length;
+            for (int i = 0; i < size; i++)
+            {
+                inputs.Add(runInput[i]);
+                outputs.Add(Activity.RUN);
+            }
+            size = walkInput.Length;
+            for (int i = 0; i < size; i++)
+            {
+                inputs.Add(walkInput[i]);
+                outputs.Add(Activity.WALK);
+            }
+            // We are trying to predict two different classes
+            int classes = 2;
+
+            // Each sequence may have up to two symbols (0 or 1)
+            int symbols = 2;
+
+            // Nested models will have two states each
+            int[] states = new int[] { 2, 2 };
+
+            // Creates a new Hidden Markov Model Sequence Classifier with the given parameters
+            HiddenMarkovClassifier classifier = new HiddenMarkovClassifier(classes, states, symbols);
+
+            // Create a new learning algorithm to train the sequence classifier
+            var teacher = new HiddenMarkovClassifierLearning(classifier,
+
+                // Train each model until the log-likelihood changes less than 0.001
+                modelIndex => new BaumWelchLearning(classifier.Models[modelIndex])
+                {
+                    Tolerance = 0.001,
+                    Iterations = 0
+                }
+            );
+
+            // Train the sequence classifier using the algorithm
+            //double likelihood = teacher.Run(inputs.ToArray(), outputs.ToArray());
+             * */
         }
     }
 }
