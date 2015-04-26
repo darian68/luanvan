@@ -42,7 +42,7 @@ namespace Main.Data
                         // if dof has less then 3 value, set 0 for the rest
                         for (int k = j; k < 4; k++)
                         {
-                            data.Add(0.00);
+                            data.Add(1);
                         }
                         break;
                     }
@@ -81,7 +81,7 @@ namespace Main.Data
                         // if dof has less then 3 value, set 0 for the rest
                         for (int k = j; k < 4; k++)
                         {
-                            frame.Add(0.00);
+                            frame.Add(1);
                         }
                         break;
                     }
