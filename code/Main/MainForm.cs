@@ -58,6 +58,7 @@ namespace Main
             LoadAmcFolder amcJumpFolder = new LoadAmcFolder(pathJump, boneNames);
             //LoadAmcFolder amcJump = new LoadAmcFolder(pathJump, boneNames);
             //LoadAmcFolder amcDance = new LoadAmcFolder(pathDance, boneNames);
+            int dimension = 3 * (boneNames.Length + 1);
             double[][][] runInput = amcRunFolder.readDataAs3DVetor();
             double[][][] walkInput = amcWalkFolder.readDataAs3DVetor();
             double[][][] jumpInput = amcJumpFolder.readDataAs3DVetor();
@@ -67,26 +68,26 @@ namespace Main
             int size = runInput.Length;
             for (int i = 0; i < size; i++)
             {
-                inputs.Add(Matrix.Concatenate(runInput[i]));
+                inputs.Add(Matrix.Concatenate(new PCA().transform(runInput[i], dimension)));
                 outputs.Add(Activity.RUN);
             }
             size = walkInput.Length;
             for (int i = 0; i < size; i++)
             {
-                inputs.Add(Matrix.Concatenate(walkInput[i]));
-                outputs.Add(Activity.RUN);
+                inputs.Add(Matrix.Concatenate(new PCA().transform(walkInput[i], dimension)));
+                outputs.Add(Activity.WALK);
             }
             size = jumpInput.Length;
-            for (int i = 0; i < size; i++)
+            //for (int i = 0; i < size; i++)
             {
-                inputs.Add(Matrix.Concatenate(jumpInput[i]));
-                outputs.Add(Activity.JUMP);
+                //inputs.Add(Matrix.Concatenate(jumpInput[i]));
+                //outputs.Add(Activity.JUMP);
             }
             // Create a new Linear kernel with length = (3 * (boneNames.Length + 1(if have root)) )
-            IKernel kernel = new DynamicTimeWarping(3 * (boneNames.Length + 1));
+            IKernel kernel = new DynamicTimeWarping(dimension);
             // Create a new Multi-class Support Vector Machine with 1 input,
             //  using the linear kernel and for four disjoint classes.
-            var machine = new MulticlassSupportVectorMachine(0, kernel, 3);
+            var machine = new MulticlassSupportVectorMachine(0, kernel, 2);
             // Create the Multi-class learning algorithm for the machine
             var teacher = new MulticlassSupportVectorLearning(machine, inputs.ToArray(), outputs.ToArray());
             // Configure the learning algorithm to use SMO to train the
@@ -94,7 +95,7 @@ namespace Main
             teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
                 new SequentialMinimalOptimization(svm, classInputs, classOutputs)
                 {
-                    Complexity = 1.5
+                    Complexity = 450
                 };
             // Run the learning algorithm
             double error = teacher.Run();
@@ -115,8 +116,14 @@ namespace Main
             // And start learning it!
             double error = smo.Run(true);
             */
-
-            txtOutput.Text = "Finished training!";
+            txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
+            size = inputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                double result = machine.Compute(inputs[i]);
+                txtOutput.Text += "\n"+ (i+1).ToString()+"-Expected: " + outputs[i] + " - Actual: " + result.ToString();
+            }
+            /*
             string pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_55.amc");
             LoadAmcFile runFile = new LoadAmcFile(pathPatternRun, boneNames);
             double result = machine.Compute(runFile.readDataAsVetor());
@@ -133,7 +140,6 @@ namespace Main
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.readDataAsVetor());
             //txtOutput.Text += "\nResult Class: " + result;
-            /*
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\08_06.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.readDataAsVetor());
@@ -142,7 +148,6 @@ namespace Main
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.readDataAsVetor());
             txtOutput.Text += "\nResult Class: " + result;
-             */
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_01.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.readDataAsVetor());
@@ -151,6 +156,7 @@ namespace Main
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = machine.Compute(runFile.readDataAsVetor());
             txtOutput.Text += "\nResult Class: " + (result);
+             */
         }
 
         private void btnHMM_Click(object sender, EventArgs e)
@@ -170,7 +176,7 @@ namespace Main
 
             // Kmeans
             // Create a new K-Means algorithm with 3 clusters 
-            KMeans kmeans = new KMeans(3);
+            KMeans kmeans = new KMeans(10);
 
             // Compute the algorithm, retrieving an integer array
             //  containing the labels for each of the observations
@@ -192,10 +198,10 @@ namespace Main
             int classes = 2;
 
             // Each sequence may have up to two symbols (0 or 1)
-            int symbols = 3;
+            int symbols = 10;
 
             // Nested models will have two states each
-            int[] states = new int[] { 5, 5 };
+            int[] states = new int[] { 10, 10 };
 
             // Creates a new Hidden Markov Model Sequence Classifier with the given parameters
             HiddenMarkovClassifier classifier = new HiddenMarkovClassifier(classes, states, symbols);
@@ -206,7 +212,7 @@ namespace Main
                 // Train each model until the log-likelihood changes less than 0.001
                 modelIndex => new BaumWelchLearning(classifier.Models[modelIndex])
                 {
-                    Tolerance = 0.001,
+                    Tolerance = 0.0001,
                     Iterations = 0
                 }
             );
@@ -214,6 +220,14 @@ namespace Main
             // Train the sequence classifier using the algorithm
             double likelihood = teacher.Run(inputs, outputs);
             double error = teacher.ComputeError(inputs, outputs);
+            txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
+            size = inputs.Length;
+            for (int i = 0; i < size; i++)
+            {
+                double result = classifier.Compute(inputs[i]);
+                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + outputs[i] + " - Actual: " + result.ToString();
+            }
+            /*
             txtOutput.Text += "\nError: " + error.ToString();
             string pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\09_01.amc");
             LoadAmcFile runFile = new LoadAmcFile(pathPatternRun, boneNames);
@@ -233,6 +247,7 @@ namespace Main
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
             result = result = classifier.Compute(kmeans.Compute(runFile.readDataAs2DVetor()));
             txtOutput.Text += "\nResult Class: " + (result);
+             */
         }
     }
 }
