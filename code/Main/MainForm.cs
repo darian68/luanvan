@@ -58,7 +58,7 @@ namespace Main
             LoadAmcFolder amcJumpFolder = new LoadAmcFolder(pathJump, boneNames);
             //LoadAmcFolder amcJump = new LoadAmcFolder(pathJump, boneNames);
             //LoadAmcFolder amcDance = new LoadAmcFolder(pathDance, boneNames);
-            int dimension = 3 * (boneNames.Length + 1);
+            int dimension = 3 * (boneNames.Length + 1) - 1;
             double[][][] runInput = amcRunFolder.readDataAs3DVetor();
             double[][][] walkInput = amcWalkFolder.readDataAs3DVetor();
             double[][][] jumpInput = amcJumpFolder.readDataAs3DVetor();
@@ -84,7 +84,12 @@ namespace Main
                 //outputs.Add(Activity.JUMP);
             }
             // Create a new Linear kernel with length = (3 * (boneNames.Length + 1(if have root)) )
-            IKernel kernel = new DynamicTimeWarping(dimension);
+            //IKernel kernel = new DynamicTimeWarping(dimension);
+            //var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(dimension));
+            //var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(length: 3));
+            //Gaussian gau = new Gaussian();
+            var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(dimension));
+            kernel.Sigma = 0.01;
             // Create a new Multi-class Support Vector Machine with 1 input,
             //  using the linear kernel and for four disjoint classes.
             var machine = new MulticlassSupportVectorMachine(0, kernel, 2);
@@ -93,10 +98,7 @@ namespace Main
             // Configure the learning algorithm to use SMO to train the
             //  underlying SVMs in each of the binary class subproblems.
             teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
-                new SequentialMinimalOptimization(svm, classInputs, classOutputs)
-                {
-                    Complexity = 450
-                };
+                new SequentialMinimalOptimization(svm, classInputs, classOutputs);
             // Run the learning algorithm
             double error = teacher.Run();
             /*
@@ -120,43 +122,43 @@ namespace Main
             size = inputs.Count;
             for (int i = 0; i < size; i++)
             {
-                double result = machine.Compute(inputs[i]);
-                txtOutput.Text += "\n"+ (i+1).ToString()+"-Expected: " + outputs[i] + " - Actual: " + result.ToString();
+                //double result = machine.Compute(inputs[i]);
+                //txtOutput.Text += "\n"+ (i+1).ToString()+"-Expected: " + outputs[i] + " - Actual: " + result.ToString();
             }
-            /*
+            
             string pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_55.amc");
             LoadAmcFile runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            double result = machine.Compute(runFile.readDataAsVetor());
-            //txtOutput.Text += "\nResult Class: " + result;
+            double result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
+            txtOutput.Text += "\nResult Class: " + result;
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\09_01.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(runFile.readDataAsVetor());
+            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
             txtOutput.Text += "\nResult Class: " + (result);
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\09_02.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(runFile.readDataAsVetor());
+            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
             txtOutput.Text += "\nResult Class: " + (result);
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_35.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(runFile.readDataAsVetor());
-            //txtOutput.Text += "\nResult Class: " + result;
+            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
+            txtOutput.Text += "\nResult Class: " + result;
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\08_06.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(runFile.readDataAsVetor());
+            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
             txtOutput.Text += "\nResult Class: " + result;
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\08_03.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(runFile.readDataAsVetor());
+            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
             txtOutput.Text += "\nResult Class: " + result;
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_01.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(runFile.readDataAsVetor());
+            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
             txtOutput.Text += "\nResult Class: " + (result);
             pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_03.amc");
             runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(runFile.readDataAsVetor());
+            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
             txtOutput.Text += "\nResult Class: " + (result);
-             */
+            
         }
 
         private void btnHMM_Click(object sender, EventArgs e)
