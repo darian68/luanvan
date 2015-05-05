@@ -51,6 +51,11 @@ namespace Main.Data
             LoadAmcFile amcFile;
             for (int f = 0; f < numFiles; f++)
             {
+                // out of memory at 31
+                if (f == 30)
+                {
+                    break;
+                }
                 fileName = fileList[f];
                 amcFile = new LoadAmcFile(fileName, this.boneNames);
                 data.Add(amcFile.readDataAs2DVetor());
