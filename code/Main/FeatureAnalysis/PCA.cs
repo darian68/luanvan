@@ -15,12 +15,15 @@ namespace Main.FeatureExtraction
 
         }
         public double[][] transform(double[][] sourceMatrix, int dimension) {
+            return sourceMatrix;
+            /*
             // Creates the Principal Component Analysis of the given source
             var pca = new PrincipalComponentAnalysis(sourceMatrix, AnalysisMethod.Center);
             // Compute the Principal Component Analysis
             pca.Compute();
             // Creates a projection considering 80% of the information
             return pca.Transform(sourceMatrix, dimension);
+             * */
         }
     }
 }

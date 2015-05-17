@@ -65,6 +65,7 @@ namespace Main.Data
             lines = File.ReadAllLines(fileName);
             frame = new List<double>();
             int lineIndex = 0;
+            int frameIndex = 0;
             foreach (string line in lines)
             {
                 temp = line.Split(' ');
@@ -94,6 +95,7 @@ namespace Main.Data
                         data.Add(frame.ToArray());
                     }
                     frame = new List<double>();
+                    frameIndex++;
                 }
                 // Add last frame
                 if (lineIndex == lines.Length - 1)

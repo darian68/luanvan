@@ -49,16 +49,26 @@ namespace Main.Data
             int numBones = boneNames.Length;
             string fileName;
             LoadAmcFile amcFile;
+            List<double[]> frames = new List<double[]>();
             for (int f = 0; f < numFiles; f++)
             {
                 // out of memory at 31
-                if (f == 30)
+                if (f == 40)
                 {
-                    break;
+                    //break;
                 }
                 fileName = fileList[f];
                 amcFile = new LoadAmcFile(fileName, this.boneNames);
-                data.Add(amcFile.readDataAs2DVetor());
+                double[][] vector2D = amcFile.readDataAs2DVetor();
+                if (vector2D.Length >= 200)
+                {
+                    for (int i = 0; i < 120; i++)
+                    {
+                        frames.Add(vector2D[i]);
+                    }
+                    data.Add(frames.ToArray());
+                    frames = new List<double[]>();
+                }
             }
             return data.ToArray();
         }

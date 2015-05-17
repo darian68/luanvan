@@ -296,7 +296,6 @@ D:\000-Thesis\01-NewGIT\code\Main\bin\Debug\Accord.Math.pdb
 D:\000-Thesis\01-NewGIT\code\Main\bin\Debug\Accord.Statistics.pdb
 D:\000-Thesis\01-NewGIT\code\Main\bin\Debug\AForge.xml
 D:\000-Thesis\01-NewGIT\code\Main\bin\Debug\AForge.Math.xml
-D:\000-Thesis\01-NewGIT\code\Main\obj\Debug\Main.csprojResolveAssemblyReference.cache
 D:\000-Thesis\01-NewGIT\code\Main\obj\Debug\Main.MainForm.resources
 D:\000-Thesis\01-NewGIT\code\Main\obj\Debug\Main.Properties.Resources.resources
 D:\000-Thesis\01-NewGIT\code\Main\obj\Debug\Main.csproj.GenerateResource.Cache
@@ -400,3 +399,4 @@ D:\000-Thesis\01-NewGIT\code\Main\bin\Debug\Acclaim\pattern\walk\35_07.amc
 D:\000-Thesis\01-NewGIT\code\Main\bin\Debug\Acclaim\pattern\walk\36_15.amc
 D:\000-Thesis\01-NewGIT\code\Main\bin\Debug\Acclaim\pattern\walk\39_09.amc
 D:\000-Thesis\01-NewGIT\code\Main\bin\Debug\Acclaim\pattern\walk\46_01.amc
+D:\000-Thesis\01-NewGIT\code\Main\obj\Debug\Main.csprojResolveAssemblyReference.cache

@@ -64,7 +64,7 @@ namespace Main
             LoadAmcFolder amcTestJumpFolder = new LoadAmcFolder(testJump, boneNames);
             //LoadAmcFolder amcJump = new LoadAmcFolder(pathJump, boneNames);
             //LoadAmcFolder amcDance = new LoadAmcFolder(pathDance, boneNames);
-            int dimension = 3 * (boneNames.Length + 1) - 1;
+            int dimension = 3 * (boneNames.Length + 1);
             double[][][] runInput = amcRunFolder.readDataAs3DVetor();
             double[][][] walkInput = amcWalkFolder.readDataAs3DVetor();
             double[][][] jumpInput = amcJumpFolder.readDataAs3DVetor();
@@ -118,7 +118,7 @@ namespace Main
             //var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(length: 3));
             //Gaussian gau = new Gaussian();
             var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(dimension));
-            kernel.Sigma = 0.01;
+            kernel.Sigma = 0.00001;
             // Create a new Multi-class Support Vector Machine with 1 input,
             //  using the linear kernel and for four disjoint classes.
             var machine = new MulticlassSupportVectorMachine(0, kernel, 3);
@@ -127,7 +127,9 @@ namespace Main
             // Configure the learning algorithm to use SMO to train the
             //  underlying SVMs in each of the binary class subproblems.
             teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
-                new SequentialMinimalOptimization(svm, classInputs, classOutputs);
+                new SequentialMinimalOptimization(svm, classInputs, classOutputs){
+                    CacheSize = 0
+                };
             // Run the learning algorithm
             double error = teacher.Run();
             /*
