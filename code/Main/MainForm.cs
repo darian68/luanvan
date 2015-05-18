@@ -23,313 +23,178 @@ namespace Main
 {
     public partial class MainForm : Form
     {
-        string outPutDirectory = new Uri (Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase)).LocalPath;
+        private string outPutDirectory = new Uri (Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase)).LocalPath;
+        private List<double[][]> trainInputs = null;
+        private List<double[][]> testInputs = null;
+        private List<int> trainOutputs = null;
+        private List<int> testOutputs = null;
+        private int numberClasses = 3;
+        private int numberFrame = 120;
+        private int dimension = 5;
+        private double threshold = 0.0001;
+        private double c = 0.4;
         public MainForm()
         {
             InitializeComponent();
         }
-
-        private void btnSVM_Click(object sender, EventArgs e)
+        private void readData()
         {
-            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            txtOutput.Text = "";
-            string pathRun = Path.Combine(outPutDirectory, "Acclaim\\training\\run");
-            string pathWalk = Path.Combine(outPutDirectory, "Acclaim\\training\\walk");
-            string pathJump = Path.Combine(outPutDirectory, "Acclaim\\training\\jump");
-            string testRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\run");
-            string testWalk = Path.Combine(outPutDirectory, "Acclaim\\pattern\\walk");
-            string testJump = Path.Combine(outPutDirectory, "Acclaim\\pattern\\jump");
-            //string pathJump = "D:\\acclaim\\training\\jump";
-            //string pathDance = "D:\\acclaim\\training\\dance";
-            // 23 bones
-            string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur", "rradius", "lradius", "rtibia", "ltibia", "lwrist", "rwrist", "lhand", "rhand", "lfoot", "rfoot" };
-            // 13 bones
-            //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur"};
-            // 7 bones
-            //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head"};
-            // 4 bones
-            //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax"};
-            // 3 bones
-            //string[] boneNames = new string[] { "root", "lowerback", "upperback"};
-            //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head" };
-            //string[] boneNames = new string[] { "thorax", "head", "rhand", "lhand", "rfemur", "lfemur", "rfoot", "lfoot" };
-            //string[] boneNames = new string[] {"root"};
-            //
-            //string[] boneNames = new string[] { "head" };
-
-            LoadAmcFolder amcRunFolder = new LoadAmcFolder(pathRun, boneNames);
-            LoadAmcFolder amcWalkFolder = new LoadAmcFolder(pathWalk, boneNames);
-            LoadAmcFolder amcJumpFolder = new LoadAmcFolder(pathJump, boneNames);
-            LoadAmcFolder amcTestRunFolder = new LoadAmcFolder(testRun, boneNames);
-            LoadAmcFolder amcTestWalkFolder = new LoadAmcFolder(testWalk, boneNames);
-            LoadAmcFolder amcTestJumpFolder = new LoadAmcFolder(testJump, boneNames);
-            //LoadAmcFolder amcJump = new LoadAmcFolder(pathJump, boneNames);
-            //LoadAmcFolder amcDance = new LoadAmcFolder(pathDance, boneNames);
-            int dimension = 5;
-            double[][][] runInput = amcRunFolder.readDataAs3DVetor();
-            double[][][] walkInput = amcWalkFolder.readDataAs3DVetor();
-            double[][][] jumpInput = amcJumpFolder.readDataAs3DVetor();
-            double[][][] testRunInput = amcTestRunFolder.readDataAs3DVetor();
-            double[][][] testWalkInput = amcTestWalkFolder.readDataAs3DVetor();
-            double[][][] testJumpInput = amcTestJumpFolder.readDataAs3DVetor();
-            //double[][] danceInput = amcDance.data.ToArray();
+            // Read params
+            if (numberFrame != int.Parse(txtFrames.Text))
+            {
+                numberFrame = int.Parse(txtFrames.Text);
+                // re-read data
+                trainInputs = null;
+            }
+            dimension = int.Parse(txtDim.Text);
+            if (txtCom.Text != string.Empty)
+            {
+                c = double.Parse(txtCom.Text);
+            }
+            threshold = double.Parse(txtThreshold.Text);
+            if (trainInputs == null 
+                || testInputs == null 
+                || trainOutputs == null 
+                || testOutputs == null)
+            {
+                trainInputs = new List<double[][]>();
+                testInputs = new List<double[][]>();
+                trainOutputs = new List<int>();
+                testOutputs = new List<int>();
+                // 23 bones
+                string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur", "rradius", "lradius", "rtibia", "ltibia", "lwrist", "rwrist", "lhand", "rhand", "lfoot", "rfoot" };
+                // 13 bones
+                //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur"};
+                // 7 bones
+                //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head"};
+                // 4 bones
+                //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax"};
+                // 3 bones
+                //string[] boneNames = new string[] { "root", "lowerback", "upperback"};
+                string pathRun = Path.Combine(outPutDirectory, "Acclaim\\training\\run");
+                string pathWalk = Path.Combine(outPutDirectory, "Acclaim\\training\\walk");
+                string pathJump = Path.Combine(outPutDirectory, "Acclaim\\training\\jump");
+                string testRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\run");
+                string testWalk = Path.Combine(outPutDirectory, "Acclaim\\pattern\\walk");
+                string testJump = Path.Combine(outPutDirectory, "Acclaim\\pattern\\jump");
+                LoadAmcFolder amcRunFolder = new LoadAmcFolder(pathRun, boneNames);
+                LoadAmcFolder amcWalkFolder = new LoadAmcFolder(pathWalk, boneNames);
+                LoadAmcFolder amcJumpFolder = new LoadAmcFolder(pathJump, boneNames);
+                LoadAmcFolder amcTestRunFolder = new LoadAmcFolder(testRun, boneNames);
+                LoadAmcFolder amcTestWalkFolder = new LoadAmcFolder(testWalk, boneNames);
+                LoadAmcFolder amcTestJumpFolder = new LoadAmcFolder(testJump, boneNames);
+                double[][][] runInput = amcRunFolder.readDataAs3DVetor(numberFrame);
+                double[][][] walkInput = amcWalkFolder.readDataAs3DVetor(numberFrame);
+                double[][][] jumpInput = amcJumpFolder.readDataAs3DVetor(numberFrame);
+                double[][][] testRunInput = amcTestRunFolder.readDataAs3DVetor(numberFrame);
+                double[][][] testWalkInput = amcTestWalkFolder.readDataAs3DVetor(numberFrame);
+                double[][][] testJumpInput = amcTestJumpFolder.readDataAs3DVetor(numberFrame);
+                int size = runInput.Length;
+                for (int i = 0; i < size; i++)
+                {
+                    trainInputs.Add(runInput[i]);
+                    trainOutputs.Add(Activity.RUN);
+                }
+                size = walkInput.Length;
+                for (int i = 0; i < size; i++)
+                {
+                    trainInputs.Add(walkInput[i]);
+                    trainOutputs.Add(Activity.WALK);
+                }
+                size = jumpInput.Length;
+                for (int i = 0; i < size; i++)
+                {
+                    trainInputs.Add(jumpInput[i]);
+                    trainOutputs.Add(Activity.JUMP);
+                }
+                size = testRunInput.Length;
+                for (int i = 0; i < size; i++)
+                {
+                    testInputs.Add(testRunInput[i]);
+                    testOutputs.Add(Activity.RUN);
+                }
+                size = testWalkInput.Length;
+                for (int i = 0; i < size; i++)
+                {
+                    testInputs.Add(testWalkInput[i]);
+                    testOutputs.Add(Activity.WALK);
+                }
+                size = testJumpInput.Length;
+                for (int i = 0; i < size; i++)
+                {
+                    testInputs.Add(testJumpInput[i]);
+                    testOutputs.Add(Activity.JUMP);
+                }
+            }
+        }
+        private void btnKPCA_Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            txtOutput.Text = "RUNNING...";
+            readData();
             List<double[]> inputs = new List<double[]>();
-            List<double[]> testInputs = new List<double[]>();
-            List<int> outputs = new List<int>();
-            List<int> testOutputs = new List<int>();
-            int size = runInput.Length;
+            int size = trainInputs.Count;
             for (int i = 0; i < size; i++)
             {
-                inputs.Add(Matrix.Concatenate(new PCA().transform(runInput[i], dimension)));
-                outputs.Add(Activity.RUN);
+                inputs.Add(Matrix.Concatenate(new KPCA().transform(trainInputs[i], dimension, threshold)));
             }
-            size = walkInput.Length;
-            for (int i = 0; i < size; i++)
-            {
-                inputs.Add(Matrix.Concatenate(new PCA().transform(walkInput[i], dimension)));
-                outputs.Add(Activity.WALK);
-            }
-            size = jumpInput.Length;
-            for (int i = 0; i < size; i++)
-            {
-                inputs.Add(Matrix.Concatenate(new PCA().transform(jumpInput[i], dimension)));
-                outputs.Add(Activity.JUMP);
-            }
-            size = testRunInput.Length;
-            for (int i = 0; i < size; i++)
-            {
-                testInputs.Add(Matrix.Concatenate(new PCA().transform(testRunInput[i], dimension)));
-                testOutputs.Add(Activity.RUN);
-            }
-            size = testWalkInput.Length;
-            for (int i = 0; i < size; i++)
-            {
-                testInputs.Add(Matrix.Concatenate(new PCA().transform(testWalkInput[i], dimension)));
-                testOutputs.Add(Activity.WALK);
-            }
-            size = testJumpInput.Length;
-            for (int i = 0; i < size; i++)
-            {
-                testInputs.Add(Matrix.Concatenate(new PCA().transform(testJumpInput[i], dimension)));
-                testOutputs.Add(Activity.JUMP);
-            }
-            // Create a new Linear kernel with length = (3 * (boneNames.Length + 1(if have root)) )
-            //IKernel kernel = new DynamicTimeWarping(dimension);
-            //var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(dimension));
-            //var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(length: 3));
-            //Gaussian gau = new Gaussian();
-            /*
-            var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(dimension));
-            kernel.Sigma = 0.00001;
-            // Create a new Multi-class Support Vector Machine with 1 input,
-            //  using the linear kernel and for four disjoint classes.
-            var machine = new MulticlassSupportVectorMachine(0, kernel, 3);
-            // Create the Multi-class learning algorithm for the machine
-            var teacher = new MulticlassSupportVectorLearning(machine, inputs.ToArray(), outputs.ToArray());
-            // Configure the learning algorithm to use SMO to train the
-            //  underlying SVMs in each of the binary class subproblems.
-            teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
-                new SequentialMinimalOptimization(svm, classInputs, classOutputs){
-                    CacheSize = 0
-                };
-            // Run the learning algorithm
-            double error = teacher.Run();
-             */
             // Create a new Linear kernel
             IKernel kernel = new Linear();
-
             // Create a new Multi-class Support Vector Machine with one input,
             //  using the linear kernel and for four disjoint classes.
-            var machine = new MulticlassSupportVectorMachine(inputs[0].Length, kernel, 3);
-
+            var machine = new MulticlassSupportVectorMachine(inputs[0].Length, kernel, numberClasses);
             // Create the Multi-class learning algorithm for the machine
-            
-            var teacher = new MulticlassSupportVectorLearning(machine, inputs.ToArray(), outputs.ToArray());
-
+            var teacher = new MulticlassSupportVectorLearning(machine, inputs.ToArray(), trainOutputs.ToArray());
             // Configure the learning algorithm to use SMO to train the
             //  underlying SVMs in each of the binary class subproblems.
-            teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
-                new SequentialMinimalOptimization(svm, classInputs, classOutputs)
-                {
-                    Complexity = 0.4
-                };
-
+            if (txtCom.Text != string.Empty)
+            {
+                teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
+                    new SequentialMinimalOptimization(svm, classInputs, classOutputs)
+                    {
+                        Complexity = c
+                    };
+            }
+            else
+            {
+                teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
+                    new SequentialMinimalOptimization(svm, classInputs, classOutputs);
+            }
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             // Run the learning algorithm
             double error = teacher.Run();
-
-            /*
-            DynamicTimeWarping kernel = new DynamicTimeWarping(length: 3 * (boneNames.Length + 1));
-
-            // Now we can create the machine. When using variable-length
-            // kernels, we will need to pass zero as the input length:
-            var machine = new KernelSupportVectorMachine(kernel, inputs: 0);
-
-
-            // Create the Sequential Minimal Optimization learning algorithm
-            var smo = new SequentialMinimalOptimization(machine, inputs.ToArray(), outputs.ToArray())
-            {
-                Complexity = 1.5
-            };
-
-            // And start learning it!
-            double error = smo.Run(true);
-            */
-            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            long seconds = (end - begin) / 1000;
             txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
             size = testInputs.Count;
             double acc = 0.0;
             for (int i = 0; i < size; i++)
             {
-                int result = machine.Compute(testInputs[i]);
+                int result = machine.Compute(Matrix.Concatenate(new KPCA().transform(testInputs[i], dimension, threshold)));
                 if (testOutputs[i] == result)
                 {
                     acc += 1;
                 }
                 txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
             }
+            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            long seconds = (end - begin) / 1000;
             double accRate = acc / size;
             txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
             txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
-            /*
-            string pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_55.amc");
-            LoadAmcFile runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            double result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
-            txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\09_01.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
-            txtOutput.Text += "\nResult Class: " + (result);
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\09_02.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
-            txtOutput.Text += "\nResult Class: " + (result);
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_35.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
-            txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\08_06.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
-            txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\08_03.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
-            txtOutput.Text += "\nResult Class: " + result;
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_01.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
-            txtOutput.Text += "\nResult Class: " + (result);
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_03.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = machine.Compute(Matrix.Concatenate(new PCA().transform(runFile.readDataAs2DVetor(), dimension)));
-            txtOutput.Text += "\nResult Class: " + (result);
-            */
+            Cursor.Current = Cursors.Default;
         }
 
-        private void btnHMM_Click(object sender, EventArgs e)
+        private void btnKLDA_Click(object sender, EventArgs e)
         {
-            
-            txtOutput.Text = "";
-            string pathRun = Path.Combine(outPutDirectory, "Acclaim\\training\\run");
-            string pathWalk = Path.Combine(outPutDirectory, "Acclaim\\training\\walk");
-            // 23 bones
-            string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur", "rradius", "lradius", "rtibia", "ltibia", "lwrist", "rwrist", "lhand", "rhand", "lfoot", "rfoot" };
-            LoadAmcFolder amcRunFolder = new LoadAmcFolder(pathRun, boneNames);
-            LoadAmcFolder amcWalkFolder = new LoadAmcFolder(pathWalk, boneNames);
-            //LoadAmcFolder amcJump = new LoadAmcFolder(pathJump, boneNames);
-            //LoadAmcFolder amcDance = new LoadAmcFolder(pathDance, boneNames);
-            double[][][] runInput = amcRunFolder.readDataAs3DVetor();
-            double[][][] walkInput = amcWalkFolder.readDataAs3DVetor();
+            Cursor.Current = Cursors.WaitCursor;
+            txtOutput.Text = "NOT IMPLEMENT YET";
+            Cursor.Current = Cursors.Default;
+        }
 
-            // Kmeans
-            // Create a new K-Means algorithm with 3 clusters 
-            KMeans kmeans = new KMeans(30);
-
-            // Compute the algorithm, retrieving an integer array
-            //  containing the labels for each of the observations
-            int[][] inputs = new int[runInput.Length + walkInput.Length][];
-            int[] outputs = new int[runInput.Length + walkInput.Length];
-            int size = runInput.Length;
-            for (int i = 0; i < size; i++)
-            {
-                inputs[i] = kmeans.Compute(runInput[i]);
-                outputs[i] = Activity.RUN;
-            }
-            int size2 = walkInput.Length;
-            for (int i = 0; i < size2; i++)
-            {
-                inputs[i + size] = kmeans.Compute(walkInput[i]);
-                outputs[i + size] = Activity.WALK;
-            }
-            int classes = 2;
-
-            int symbols = 30;
-
-            // Nested models will have two states each
-            int[] states = new int[] { 30, 30 };
-
-            // Creates a new Hidden Markov Model Sequence Classifier with the given parameters
-            HiddenMarkovClassifier classifier = new HiddenMarkovClassifier(classes, states, symbols);
-
-            // Create a new learning algorithm to train the sequence classifier
-            var teacher = new HiddenMarkovClassifierLearning(classifier,
-
-                // Train each model until the log-likelihood changes less than 0.001
-                modelIndex => new BaumWelchLearning(classifier.Models[modelIndex])
-                {
-                    Tolerance = 0.0001,
-                    Iterations = 0
-                }
-            );
-            
-            // Train the sequence classifier using the algorithm
-            double likelihood = teacher.Run(inputs, outputs);
-            double error = teacher.ComputeError(inputs, outputs);
-            txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
-            size = inputs.Length;
-            for (int i = 0; i < size; i++)
-            {
-                double result = classifier.Compute(inputs[i]);
-                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + outputs[i] + " - Actual: " + result.ToString();
-            }
-            /*
-            txtOutput.Text += "\nError: " + error.ToString();
-            string pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\09_01.amc");
-            LoadAmcFile runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            int result = classifier.Compute(kmeans.Compute(runFile.readDataAs2DVetor()));
-            txtOutput.Text += "\nResult Class: " + (result);
-
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\09_02.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = result = classifier.Compute(kmeans.Compute(runFile.readDataAs2DVetor()));
-            txtOutput.Text += "\nResult Class: " + (result);
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_35.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = result = classifier.Compute(kmeans.Compute(runFile.readDataAs2DVetor()));
-            txtOutput.Text += "\nResult Class: " + (result);
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_55.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = result = classifier.Compute(kmeans.Compute(runFile.readDataAs2DVetor()));
-            txtOutput.Text += "\nResult Class: " + (result);
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_01.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = classifier.Compute(kmeans.Compute(runFile.readDataAs2DVetor()));
-            txtOutput.Text += "\nResult Class: " + (result);
-
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\07_03.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = result = classifier.Compute(kmeans.Compute(runFile.readDataAs2DVetor()));
-            txtOutput.Text += "\nResult Class: " + (result);
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\08_03.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = result = classifier.Compute(kmeans.Compute(runFile.readDataAs2DVetor()));
-            txtOutput.Text += "\nResult Class: " + (result);
-            pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\08_06.amc");
-            runFile = new LoadAmcFile(pathPatternRun, boneNames);
-            result = result = classifier.Compute(kmeans.Compute(runFile.readDataAs2DVetor()));
-            txtOutput.Text += "\nResult Class: " + (result);
-             */
+        private void btnDTW_Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            txtOutput.Text = "NOT IMPLEMENT YET";
+            Cursor.Current = Cursors.Default;
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Main.Data
          * Each elemnt contain data of an amc file
          * Each file is a 2D vector of all dof value
          */
-        public double[][][] readDataAs3DVetor()
+        public double[][][] readDataAs3DVetor(int numberFrames)
         {
             List<double[][]> data = new List<double[][]>();
             string[] fileList = Directory.GetFiles(this.path, "*.amc");
@@ -50,15 +50,14 @@ namespace Main.Data
             string fileName;
             LoadAmcFile amcFile;
             List<double[]> frames = new List<double[]>();
-            int limit = 120;
             for (int f = 0; f < numFiles; f++)
             {
                 fileName = fileList[f];
                 amcFile = new LoadAmcFile(fileName, this.boneNames);
                 double[][] vector2D = amcFile.readDataAs2DVetor();
-                if (vector2D.Length >= limit)
+                if (vector2D.Length >= numberFrames)
                 {
-                    for (int i = 0; i < limit; i++)
+                    for (int i = 0; i < numberFrames; i++)
                     {
                         frames.Add(vector2D[i]);
                     }

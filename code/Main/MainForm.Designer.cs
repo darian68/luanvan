@@ -31,47 +31,148 @@
             this.btnSVM = new System.Windows.Forms.Button();
             this.txtOutput = new System.Windows.Forms.RichTextBox();
             this.btnHMM = new System.Windows.Forms.Button();
+            this.btnDTW = new System.Windows.Forms.Button();
+            this.txtFrames = new System.Windows.Forms.TextBox();
+            this.txtDim = new System.Windows.Forms.TextBox();
+            this.txtCom = new System.Windows.Forms.TextBox();
+            this.txtThreshold = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btnSVM
             // 
-            this.btnSVM.Location = new System.Drawing.Point(203, 28);
+            this.btnSVM.Location = new System.Drawing.Point(7, 12);
             this.btnSVM.Name = "btnSVM";
             this.btnSVM.Size = new System.Drawing.Size(90, 40);
-            this.btnSVM.TabIndex = 0;
-            this.btnSVM.Text = "SVM";
+            this.btnSVM.TabIndex = 10;
+            this.btnSVM.Text = "KPCA";
             this.btnSVM.UseVisualStyleBackColor = true;
-            this.btnSVM.Click += new System.EventHandler(this.btnSVM_Click);
+            this.btnSVM.Click += new System.EventHandler(this.btnKPCA_Click);
             // 
             // txtOutput
             // 
-            this.txtOutput.Location = new System.Drawing.Point(103, 120);
+            this.txtOutput.Location = new System.Drawing.Point(103, 12);
             this.txtOutput.Name = "txtOutput";
-            this.txtOutput.Size = new System.Drawing.Size(421, 232);
-            this.txtOutput.TabIndex = 1;
+            this.txtOutput.Size = new System.Drawing.Size(348, 354);
+            this.txtOutput.TabIndex = 0;
             this.txtOutput.Text = "";
             // 
             // btnHMM
             // 
-            this.btnHMM.Location = new System.Drawing.Point(353, 28);
+            this.btnHMM.Location = new System.Drawing.Point(7, 58);
             this.btnHMM.Name = "btnHMM";
-            this.btnHMM.Size = new System.Drawing.Size(100, 35);
-            this.btnHMM.TabIndex = 2;
-            this.btnHMM.Text = "HMM";
+            this.btnHMM.Size = new System.Drawing.Size(90, 40);
+            this.btnHMM.TabIndex = 11;
+            this.btnHMM.Text = "KLDA";
             this.btnHMM.UseVisualStyleBackColor = true;
-            this.btnHMM.Click += new System.EventHandler(this.btnHMM_Click);
+            this.btnHMM.Click += new System.EventHandler(this.btnKLDA_Click);
+            // 
+            // btnDTW
+            // 
+            this.btnDTW.Location = new System.Drawing.Point(7, 104);
+            this.btnDTW.Name = "btnDTW";
+            this.btnDTW.Size = new System.Drawing.Size(90, 40);
+            this.btnDTW.TabIndex = 12;
+            this.btnDTW.Text = "DTW";
+            this.btnDTW.UseVisualStyleBackColor = true;
+            this.btnDTW.Click += new System.EventHandler(this.btnDTW_Click);
+            // 
+            // txtFrames
+            // 
+            this.txtFrames.Location = new System.Drawing.Point(540, 43);
+            this.txtFrames.Name = "txtFrames";
+            this.txtFrames.Size = new System.Drawing.Size(58, 20);
+            this.txtFrames.TabIndex = 3;
+            this.txtFrames.Text = "120";
+            this.txtFrames.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // txtDim
+            // 
+            this.txtDim.Location = new System.Drawing.Point(540, 78);
+            this.txtDim.Name = "txtDim";
+            this.txtDim.Size = new System.Drawing.Size(58, 20);
+            this.txtDim.TabIndex = 4;
+            this.txtDim.Text = "5";
+            this.txtDim.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // txtCom
+            // 
+            this.txtCom.Location = new System.Drawing.Point(540, 115);
+            this.txtCom.Name = "txtCom";
+            this.txtCom.Size = new System.Drawing.Size(58, 20);
+            this.txtCom.TabIndex = 5;
+            this.txtCom.Text = "1.5";
+            this.txtCom.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // txtThreshold
+            // 
+            this.txtThreshold.Location = new System.Drawing.Point(540, 150);
+            this.txtThreshold.Name = "txtThreshold";
+            this.txtThreshold.Size = new System.Drawing.Size(58, 20);
+            this.txtThreshold.TabIndex = 6;
+            this.txtThreshold.Text = "0.0001";
+            this.txtThreshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(472, 46);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(41, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Frames";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(472, 81);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(56, 13);
+            this.label2.TabIndex = 4;
+            this.label2.Text = "Dimension";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(472, 118);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(57, 13);
+            this.label3.TabIndex = 4;
+            this.label3.Text = "Complexity";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(472, 153);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(54, 13);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "Threshold";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(610, 378);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.txtThreshold);
+            this.Controls.Add(this.txtCom);
+            this.Controls.Add(this.txtDim);
+            this.Controls.Add(this.txtFrames);
+            this.Controls.Add(this.btnDTW);
             this.Controls.Add(this.btnHMM);
             this.Controls.Add(this.txtOutput);
             this.Controls.Add(this.btnSVM);
             this.Name = "MainForm";
             this.Text = "Form1";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -80,6 +181,15 @@
         private System.Windows.Forms.Button btnSVM;
         private System.Windows.Forms.RichTextBox txtOutput;
         private System.Windows.Forms.Button btnHMM;
+        private System.Windows.Forms.Button btnDTW;
+        private System.Windows.Forms.TextBox txtFrames;
+        private System.Windows.Forms.TextBox txtDim;
+        private System.Windows.Forms.TextBox txtCom;
+        private System.Windows.Forms.TextBox txtThreshold;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
     }
 }
 

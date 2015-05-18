@@ -9,36 +9,46 @@ using Accord.Statistics.Kernels;
 
 namespace Main.FeatureExtraction
 {
-    class PCA
+    class KPCA
     {
-        public PCA()
+        public KPCA()
         {
 
         }
-        public double[][] transform(double[][] sourceMatrix, int dimension) {
-            //return sourceMatrix;
-            // PCA
-            /*
-            // Creates the Principal Component Analysis of the given source
-            var pca = new PrincipalComponentAnalysis(sourceMatrix, AnalysisMethod.Center);
-            // Compute the Principal Component Analysis
-            pca.Compute();
-            // Creates a projection considering 80% of the information
-            return pca.Transform(sourceMatrix, dimension);
-            */
-
+        public double[][] transform(double[][] sourceMatrix, int dimension, double threshold) {
             // KPCA
             // Create a new linear kernel
             IKernel kernel = new Linear();
-
             // Creates the Kernel Principal Component Analysis of the given data
             var kpca = new KernelPrincipalComponentAnalysis(sourceMatrix.ToMatrix(), kernel);
-            kpca.Threshold = 0.0001;
+            kpca.Threshold = threshold; // 0.0001;
             // Compute the Kernel Principal Component Analysis
             kpca.Compute();
-
-            // Creates a projection considering 80% of the information
             return kpca.Transform(sourceMatrix.ToMatrix(), dimension).ToArray();
+        }
+    }
+    class KLDA
+    {
+        private KernelDiscriminantAnalysis kda;
+        public KLDA(double[][] inputs, int[] outputs)
+        {
+             // use, such as a linear kernel function.
+            IKernel kernel = new Linear();
+            // Then, we will create a KDA using this linear kernel.
+            var kda = new KernelDiscriminantAnalysis(inputs, outputs, kernel);
+            kda.Compute(); // Compute the analysis
+        }
+        public double[][] transform(double[][] inputs)
+        {
+            return kda.Transform(inputs);
+        }
+        public int classify(double[] inputs)
+        {
+            return kda.Classify(inputs);
+        }
+        public int[] classify(double[][] inputs)
+        {
+            return kda.Classify(inputs);
         }
     }
 }
