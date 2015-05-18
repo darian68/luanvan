@@ -50,19 +50,15 @@ namespace Main.Data
             string fileName;
             LoadAmcFile amcFile;
             List<double[]> frames = new List<double[]>();
+            int limit = 120;
             for (int f = 0; f < numFiles; f++)
             {
-                // out of memory at 31
-                if (f == 40)
-                {
-                    //break;
-                }
                 fileName = fileList[f];
                 amcFile = new LoadAmcFile(fileName, this.boneNames);
                 double[][] vector2D = amcFile.readDataAs2DVetor();
-                if (vector2D.Length >= 200)
+                if (vector2D.Length >= limit)
                 {
-                    for (int i = 0; i < 120; i++)
+                    for (int i = 0; i < limit; i++)
                     {
                         frames.Add(vector2D[i]);
                     }

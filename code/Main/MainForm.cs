@@ -31,6 +31,7 @@ namespace Main
 
         private void btnSVM_Click(object sender, EventArgs e)
         {
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             txtOutput.Text = "";
             string pathRun = Path.Combine(outPutDirectory, "Acclaim\\training\\run");
             string pathWalk = Path.Combine(outPutDirectory, "Acclaim\\training\\walk");
@@ -64,7 +65,7 @@ namespace Main
             LoadAmcFolder amcTestJumpFolder = new LoadAmcFolder(testJump, boneNames);
             //LoadAmcFolder amcJump = new LoadAmcFolder(pathJump, boneNames);
             //LoadAmcFolder amcDance = new LoadAmcFolder(pathDance, boneNames);
-            int dimension = 3 * (boneNames.Length + 1);
+            int dimension = 5;
             double[][][] runInput = amcRunFolder.readDataAs3DVetor();
             double[][][] walkInput = amcWalkFolder.readDataAs3DVetor();
             double[][][] jumpInput = amcJumpFolder.readDataAs3DVetor();
@@ -117,6 +118,7 @@ namespace Main
             //var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(dimension));
             //var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(length: 3));
             //Gaussian gau = new Gaussian();
+            /*
             var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(dimension));
             kernel.Sigma = 0.00001;
             // Create a new Multi-class Support Vector Machine with 1 input,
@@ -132,6 +134,29 @@ namespace Main
                 };
             // Run the learning algorithm
             double error = teacher.Run();
+             */
+            // Create a new Linear kernel
+            IKernel kernel = new Linear();
+
+            // Create a new Multi-class Support Vector Machine with one input,
+            //  using the linear kernel and for four disjoint classes.
+            var machine = new MulticlassSupportVectorMachine(inputs[0].Length, kernel, 3);
+
+            // Create the Multi-class learning algorithm for the machine
+            
+            var teacher = new MulticlassSupportVectorLearning(machine, inputs.ToArray(), outputs.ToArray());
+
+            // Configure the learning algorithm to use SMO to train the
+            //  underlying SVMs in each of the binary class subproblems.
+            teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
+                new SequentialMinimalOptimization(svm, classInputs, classOutputs)
+                {
+                    Complexity = 0.4
+                };
+
+            // Run the learning algorithm
+            double error = teacher.Run();
+
             /*
             DynamicTimeWarping kernel = new DynamicTimeWarping(length: 3 * (boneNames.Length + 1));
 
@@ -149,13 +174,23 @@ namespace Main
             // And start learning it!
             double error = smo.Run(true);
             */
+            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            long seconds = (end - begin) / 1000;
             txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
             size = testInputs.Count;
+            double acc = 0.0;
             for (int i = 0; i < size; i++)
             {
-                double result = machine.Compute(testInputs[i]);
+                int result = machine.Compute(testInputs[i]);
+                if (testOutputs[i] == result)
+                {
+                    acc += 1;
+                }
                 txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
             }
+            double accRate = acc / size;
+            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
+            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
             /*
             string pathPatternRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\16_55.amc");
             LoadAmcFile runFile = new LoadAmcFile(pathPatternRun, boneNames);
