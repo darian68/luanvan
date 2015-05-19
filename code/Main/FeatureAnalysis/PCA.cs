@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Accord.Statistics.Analysis;
 using Accord.Math;
 using Accord.Statistics.Kernels;
-
 namespace Main.FeatureExtraction
 {
     class KPCA
