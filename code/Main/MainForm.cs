@@ -37,7 +37,7 @@ namespace Main
         {
             InitializeComponent();
         }
-        private void readData()
+        private void readParams()
         {
             // Read params
             if (numberFrame != int.Parse(txtFrames.Text))
@@ -52,6 +52,9 @@ namespace Main
                 c = double.Parse(txtCom.Text);
             }
             threshold = double.Parse(txtThreshold.Text);
+        }
+        private void readData()
+        {
             if (trainInputs == null 
                 || testInputs == null 
                 || trainOutputs == null 
@@ -131,6 +134,7 @@ namespace Main
         {
             Cursor.Current = Cursors.WaitCursor;
             txtOutput.Text = "RUNNING...";
+            readParams();
             readData();
             List<double[]> inputs = new List<double[]>();
             int size = trainInputs.Count;
@@ -138,6 +142,7 @@ namespace Main
             {
                 inputs.Add(Matrix.Concatenate(new KPCA().transform(trainInputs[i], dimension, threshold)));
             }
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             // Create a new Linear kernel
             IKernel kernel = new Linear();
             // Create a new Multi-class Support Vector Machine with one input,
@@ -160,7 +165,6 @@ namespace Main
                 teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
                     new SequentialMinimalOptimization(svm, classInputs, classOutputs);
             }
-            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             // Run the learning algorithm
             double error = teacher.Run();
             txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
@@ -186,14 +190,176 @@ namespace Main
         private void btnKLDA_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            txtOutput.Text = "NOT IMPLEMENT YET";
+            txtOutput.Text = "RUNNING...";
+            readParams();
+            readData();
+            List<double[]> inputs = new List<double[]>();
+            List<double[]> testInputs2D = new List<double[]>();
+            int size = trainInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                inputs.Add(Matrix.Concatenate(trainInputs[i]));
+            }
+            size = testInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                testInputs2D.Add(Matrix.Concatenate(testInputs[i]));
+            }
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            KLDA kda = new KLDA(inputs.ToArray(), trainOutputs.ToArray());
+            double[][] trainresult = kda.transform(inputs.ToArray());
+            double[][] testresult = kda.transform(testInputs2D.ToArray());
+            size = testInputs.Count;
+            // KDA
+            double acc = 0.0;
+            for (int i = 0; i < size; i++)
+            {
+                int result = kda.classify(Matrix.Concatenate(testInputs[i]));
+                if (testOutputs[i] == result)
+                {
+                    acc += 1;
+                }
+                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
+            }
+            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            long seconds = (end - begin) / 1000;
+            double accRate = acc / size;
+            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
+            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
+            // SVM after KDA
+            begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            // Create a new Linear kernel
+            IKernel kernel = new Linear();
+            // Create a new Multi-class Support Vector Machine with one input,
+            //  using the linear kernel and for four disjoint classes.
+            var machine = new MulticlassSupportVectorMachine(trainresult[0].Length, kernel, numberClasses);
+            // Create the Multi-class learning algorithm for the machine
+            var teacher = new MulticlassSupportVectorLearning(machine, trainresult, trainOutputs.ToArray());
+            // Configure the learning algorithm to use SMO to train the
+            //  underlying SVMs in each of the binary class subproblems.
+            teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
+                new SequentialMinimalOptimization(svm, classInputs, classOutputs);
+            // Run the learning algorithm
+            double error = teacher.Run();
+            txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
+            size = testresult.Length;
+            acc = 0.0;
+            for (int i = 0; i < size; i++)
+            {
+                int result = machine.Compute(testresult[i]);
+                if (testOutputs[i] == result)
+                {
+                    acc += 1;
+                }
+                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
+            }
+            end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            seconds = (end - begin) / 1000;
+            accRate = acc / size;
+            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
+            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
             Cursor.Current = Cursors.Default;
         }
 
         private void btnDTW_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            txtOutput.Text = "NOT IMPLEMENT YET";
+            txtOutput.Text = "RUNNING...";
+            readParams();
+            // Set numberFrame = 0 to read all frames.
+            numberFrame = 0;
+            readData();
+            List<double[]> inputs = new List<double[]>();
+            List<double[]> testInputs2D = new List<double[]>();
+            int size = trainInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                inputs.Add(Matrix.Concatenate(trainInputs[i]));
+            }
+            size = testInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                testInputs2D.Add(Matrix.Concatenate(testInputs[i]));
+            }
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(dimension));
+            kernel.Sigma = 0.1;
+            var machine = new MulticlassSupportVectorMachine(0, kernel, numberClasses);
+            var teacher = new MulticlassSupportVectorLearning(machine, inputs.ToArray(), trainOutputs.ToArray());
+            teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
+                new SequentialMinimalOptimization(svm, classInputs, classOutputs){
+                    CacheSize = 0
+                };
+            double error = teacher.Run();
+            txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
+            size = testInputs2D.Count;
+            double acc = 0.0;
+            for (int i = 0; i < size; i++)
+            {
+                int result = machine.Compute(testInputs2D[i]);
+                if (testOutputs[i] == result)
+                {
+                    acc += 1;
+                }
+                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
+            }
+            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            long seconds = (end - begin) / 1000;
+            double accRate = acc / size;
+            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
+            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
+            Cursor.Current = Cursors.Default;
+        }
+
+        private void btnSVM_Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            txtOutput.Text = "RUNNING...";
+            readParams();
+            readData();
+            List<double[]> inputs = new List<double[]>();
+            List<double[]> testInputs2D = new List<double[]>();
+            int size = trainInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                inputs.Add(Matrix.Concatenate(trainInputs[i]));
+            }
+            size = testInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                testInputs2D.Add(Matrix.Concatenate(testInputs[i]));
+            }
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            // Create a new Linear kernel
+            IKernel kernel = new Linear();
+            // Create a new Multi-class Support Vector Machine with one input,
+            //  using the linear kernel and for four disjoint classes.
+            var machine = new MulticlassSupportVectorMachine(inputs[0].Length, kernel, numberClasses);
+            // Create the Multi-class learning algorithm for the machine
+            var teacher = new MulticlassSupportVectorLearning(machine, inputs.ToArray(), trainOutputs.ToArray());
+            // Configure the learning algorithm to use SMO to train the
+            //  underlying SVMs in each of the binary class subproblems.
+            teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
+                new SequentialMinimalOptimization(svm, classInputs, classOutputs);
+            // Run the learning algorithm
+            double error = teacher.Run();
+            txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
+            size = testInputs2D.Count;
+            double acc = 0.0;
+            for (int i = 0; i < size; i++)
+            {
+                int result = machine.Compute(testInputs2D[i]);
+                if (testOutputs[i] == result)
+                {
+                    acc += 1;
+                }
+                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
+            }
+            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            long seconds = (end - begin) / 1000;
+            double accRate = acc / size;
+            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
+            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
             Cursor.Current = Cursors.Default;
         }
     }

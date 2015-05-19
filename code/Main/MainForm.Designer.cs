@@ -28,9 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnSVM = new System.Windows.Forms.Button();
+            this.btnKPCA = new System.Windows.Forms.Button();
             this.txtOutput = new System.Windows.Forms.RichTextBox();
-            this.btnHMM = new System.Windows.Forms.Button();
+            this.btnKDA = new System.Windows.Forms.Button();
             this.btnDTW = new System.Windows.Forms.Button();
             this.txtFrames = new System.Windows.Forms.TextBox();
             this.txtDim = new System.Windows.Forms.TextBox();
@@ -40,17 +40,18 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.btnSVM = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // btnSVM
+            // btnKPCA
             // 
-            this.btnSVM.Location = new System.Drawing.Point(7, 12);
-            this.btnSVM.Name = "btnSVM";
-            this.btnSVM.Size = new System.Drawing.Size(90, 40);
-            this.btnSVM.TabIndex = 10;
-            this.btnSVM.Text = "KPCA";
-            this.btnSVM.UseVisualStyleBackColor = true;
-            this.btnSVM.Click += new System.EventHandler(this.btnKPCA_Click);
+            this.btnKPCA.Location = new System.Drawing.Point(7, 12);
+            this.btnKPCA.Name = "btnKPCA";
+            this.btnKPCA.Size = new System.Drawing.Size(90, 40);
+            this.btnKPCA.TabIndex = 10;
+            this.btnKPCA.Text = "KPCA";
+            this.btnKPCA.UseVisualStyleBackColor = true;
+            this.btnKPCA.Click += new System.EventHandler(this.btnKPCA_Click);
             // 
             // txtOutput
             // 
@@ -60,15 +61,15 @@
             this.txtOutput.TabIndex = 0;
             this.txtOutput.Text = "";
             // 
-            // btnHMM
+            // btnKDA
             // 
-            this.btnHMM.Location = new System.Drawing.Point(7, 58);
-            this.btnHMM.Name = "btnHMM";
-            this.btnHMM.Size = new System.Drawing.Size(90, 40);
-            this.btnHMM.TabIndex = 11;
-            this.btnHMM.Text = "KLDA";
-            this.btnHMM.UseVisualStyleBackColor = true;
-            this.btnHMM.Click += new System.EventHandler(this.btnKLDA_Click);
+            this.btnKDA.Location = new System.Drawing.Point(7, 58);
+            this.btnKDA.Name = "btnKDA";
+            this.btnKDA.Size = new System.Drawing.Size(90, 40);
+            this.btnKDA.TabIndex = 11;
+            this.btnKDA.Text = "KLDA";
+            this.btnKDA.UseVisualStyleBackColor = true;
+            this.btnKDA.Click += new System.EventHandler(this.btnKLDA_Click);
             // 
             // btnDTW
             // 
@@ -152,6 +153,16 @@
             this.label4.TabIndex = 4;
             this.label4.Text = "Threshold";
             // 
+            // btnSVM
+            // 
+            this.btnSVM.Location = new System.Drawing.Point(7, 153);
+            this.btnSVM.Name = "btnSVM";
+            this.btnSVM.Size = new System.Drawing.Size(90, 40);
+            this.btnSVM.TabIndex = 12;
+            this.btnSVM.Text = "SVM";
+            this.btnSVM.UseVisualStyleBackColor = true;
+            this.btnSVM.Click += new System.EventHandler(this.btnSVM_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -165,10 +176,11 @@
             this.Controls.Add(this.txtCom);
             this.Controls.Add(this.txtDim);
             this.Controls.Add(this.txtFrames);
-            this.Controls.Add(this.btnDTW);
-            this.Controls.Add(this.btnHMM);
-            this.Controls.Add(this.txtOutput);
             this.Controls.Add(this.btnSVM);
+            this.Controls.Add(this.btnDTW);
+            this.Controls.Add(this.btnKDA);
+            this.Controls.Add(this.txtOutput);
+            this.Controls.Add(this.btnKPCA);
             this.Name = "MainForm";
             this.Text = "Form1";
             this.ResumeLayout(false);
@@ -178,9 +190,9 @@
 
         #endregion
 
-        private System.Windows.Forms.Button btnSVM;
+        private System.Windows.Forms.Button btnKPCA;
         private System.Windows.Forms.RichTextBox txtOutput;
-        private System.Windows.Forms.Button btnHMM;
+        private System.Windows.Forms.Button btnKDA;
         private System.Windows.Forms.Button btnDTW;
         private System.Windows.Forms.TextBox txtFrames;
         private System.Windows.Forms.TextBox txtDim;
@@ -190,6 +202,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button btnSVM;
     }
 }
 

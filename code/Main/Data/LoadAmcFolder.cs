@@ -55,14 +55,19 @@ namespace Main.Data
                 fileName = fileList[f];
                 amcFile = new LoadAmcFile(fileName, this.boneNames);
                 double[][] vector2D = amcFile.readDataAs2DVetor();
-                if (vector2D.Length >= numberFrames)
-                {
-                    for (int i = 0; i < numberFrames; i++)
+                if (numberFrames != 0) {
+                    if (vector2D.Length >= numberFrames)
                     {
-                        frames.Add(vector2D[i]);
+                        for (int i = 0; i < numberFrames; i++)
+                        {
+                            frames.Add(vector2D[i]);
+                        }
+                        data.Add(frames.ToArray());
+                        frames = new List<double[]>();
                     }
-                    data.Add(frames.ToArray());
-                    frames = new List<double[]>();
+                } else
+                {
+                     data.Add(vector2D);
                 }
             }
             return data.ToArray();
