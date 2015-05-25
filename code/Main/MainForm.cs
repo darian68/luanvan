@@ -28,7 +28,7 @@ namespace Main
         private List<double[][]> testInputs = null;
         private List<int> trainOutputs = null;
         private List<int> testOutputs = null;
-        private int numberClasses = 3;
+        private int numberClasses = 4;
         private int numberFrame = 120;
         private int dimension = 5;
         private double threshold = 0.0001;
@@ -77,21 +77,27 @@ namespace Main
                 string pathRun = Path.Combine(outPutDirectory, "Acclaim\\training\\run");
                 string pathWalk = Path.Combine(outPutDirectory, "Acclaim\\training\\walk");
                 string pathJump = Path.Combine(outPutDirectory, "Acclaim\\training\\jump");
+                string pathDance = Path.Combine(outPutDirectory, "Acclaim\\training\\dance");
                 string testRun = Path.Combine(outPutDirectory, "Acclaim\\pattern\\run");
                 string testWalk = Path.Combine(outPutDirectory, "Acclaim\\pattern\\walk");
                 string testJump = Path.Combine(outPutDirectory, "Acclaim\\pattern\\jump");
+                string testDance = Path.Combine(outPutDirectory, "Acclaim\\pattern\\dance");
                 LoadAmcFolder amcRunFolder = new LoadAmcFolder(pathRun, boneNames);
                 LoadAmcFolder amcWalkFolder = new LoadAmcFolder(pathWalk, boneNames);
                 LoadAmcFolder amcJumpFolder = new LoadAmcFolder(pathJump, boneNames);
+                LoadAmcFolder amcDanceFolder = new LoadAmcFolder(pathDance, boneNames);
                 LoadAmcFolder amcTestRunFolder = new LoadAmcFolder(testRun, boneNames);
                 LoadAmcFolder amcTestWalkFolder = new LoadAmcFolder(testWalk, boneNames);
                 LoadAmcFolder amcTestJumpFolder = new LoadAmcFolder(testJump, boneNames);
+                LoadAmcFolder amcTestDanceFolder = new LoadAmcFolder(testDance, boneNames);
                 double[][][] runInput = amcRunFolder.readDataAs3DVetor(numberFrame);
                 double[][][] walkInput = amcWalkFolder.readDataAs3DVetor(numberFrame);
                 double[][][] jumpInput = amcJumpFolder.readDataAs3DVetor(numberFrame);
+                double[][][] danceInput = amcDanceFolder.readDataAs3DVetor(numberFrame);
                 double[][][] testRunInput = amcTestRunFolder.readDataAs3DVetor(numberFrame);
                 double[][][] testWalkInput = amcTestWalkFolder.readDataAs3DVetor(numberFrame);
                 double[][][] testJumpInput = amcTestJumpFolder.readDataAs3DVetor(numberFrame);
+                double[][][] testDanceInput = amcTestDanceFolder.readDataAs3DVetor(numberFrame);
                 int size = runInput.Length;
                 for (int i = 0; i < size; i++)
                 {
@@ -110,6 +116,12 @@ namespace Main
                     trainInputs.Add(jumpInput[i]);
                     trainOutputs.Add(Activity.JUMP);
                 }
+                size = danceInput.Length;
+                for (int i = 0; i < size; i++)
+                {
+                    trainInputs.Add(danceInput[i]);
+                    trainOutputs.Add(Activity.DANCE);
+                }
                 size = testRunInput.Length;
                 for (int i = 0; i < size; i++)
                 {
@@ -127,6 +139,12 @@ namespace Main
                 {
                     testInputs.Add(testJumpInput[i]);
                     testOutputs.Add(Activity.JUMP);
+                }
+                size = testDanceInput.Length;
+                for (int i = 0; i < size; i++)
+                {
+                    testInputs.Add(testDanceInput[i]);
+                    testOutputs.Add(Activity.DANCE);
                 }
             }
         }
@@ -169,19 +187,63 @@ namespace Main
             double error = teacher.Run();
             txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
             size = testInputs.Count;
+            int testRunSize = 0;
+            int testWalkSize = 0;
+            int testJumpSize = 0;
+            int testDanceSize = 0;
             double acc = 0.0;
+            double runAcc = 0.0;
+            double walkAcc = 0.0;
+            double jumpAcc = 0.0;
+            double danceAcc = 0.0;
             for (int i = 0; i < size; i++)
             {
+                if (testOutputs[i] == Activity.RUN)
+                {
+                    testRunSize += 1;
+                }
+                if (testOutputs[i] == Activity.WALK)
+                {
+                    testWalkSize += 1;
+                }
+                if (testOutputs[i] == Activity.JUMP)
+                {
+                    testJumpSize += 1;
+                }
+                if (testOutputs[i] == Activity.DANCE)
+                {
+                    testDanceSize += 1;
+                }
                 int result = machine.Compute(Matrix.Concatenate(new KPCA().transform(testInputs[i], dimension, threshold)));
                 if (testOutputs[i] == result)
                 {
                     acc += 1;
+                    if (testOutputs[i] == Activity.RUN)
+                    {
+                        runAcc += 1;
+                    }
+                    if (testOutputs[i] == Activity.WALK)
+                    {
+                        walkAcc += 1;
+                    }
+                    if (testOutputs[i] == Activity.JUMP)
+                    {
+                        jumpAcc += 1;
+                    }
+                    if (testOutputs[i] == Activity.DANCE)
+                    {
+                        danceAcc += 1;
+                    }
                 }
                 txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
             }
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
             double accRate = acc / size;
+            txtOutput.Text += "\n RUN Accurate rate: " + runAcc.ToString() + "/" + testRunSize + "(" + (runAcc / testRunSize).ToString() + ")";
+            txtOutput.Text += "\n WALK Accurate rate: " + walkAcc.ToString() + "/" + testWalkSize + "(" + (walkAcc / testWalkSize).ToString() + ")";
+            txtOutput.Text += "\n JUMP Accurate rate: " + jumpAcc.ToString() + "/" + testJumpSize + "(" + (jumpAcc / testJumpSize).ToString() + ")";
+            txtOutput.Text += "\n DANCE Accurate rate: " + danceAcc.ToString() + "/" + testDanceSize + "(" + (danceAcc / testDanceSize).ToString() + ")";
             txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
             txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
             Cursor.Current = Cursors.Default;
@@ -243,19 +305,63 @@ namespace Main
             double error = teacher.Run();
             txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
             size = testresult.Length;
+            int testRunSize = 0;
+            int testWalkSize = 0;
+            int testJumpSize = 0;
+            int testDanceSize = 0;
             acc = 0.0;
+            double runAcc = 0.0;
+            double walkAcc = 0.0;
+            double jumpAcc = 0.0;
+            double danceAcc = 0.0;
             for (int i = 0; i < size; i++)
             {
+                if (testOutputs[i] == Activity.RUN)
+                {
+                    testRunSize += 1;
+                }
+                if (testOutputs[i] == Activity.WALK)
+                {
+                    testWalkSize += 1;
+                }
+                if (testOutputs[i] == Activity.JUMP)
+                {
+                    testJumpSize += 1;
+                }
+                if (testOutputs[i] == Activity.DANCE)
+                {
+                    testDanceSize += 1;
+                }
                 int result = machine.Compute(testresult[i]);
                 if (testOutputs[i] == result)
                 {
                     acc += 1;
+                    if (testOutputs[i] == Activity.RUN)
+                    {
+                        runAcc += 1;
+                    }
+                    if (testOutputs[i] == Activity.WALK)
+                    {
+                        walkAcc += 1;
+                    }
+                    if (testOutputs[i] == Activity.JUMP)
+                    {
+                        jumpAcc += 1;
+                    }
+                    if (testOutputs[i] == Activity.DANCE)
+                    {
+                        danceAcc += 1;
+                    }
                 }
                 txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
             }
             end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             seconds = (end - begin) / 1000;
             accRate = acc / size;
+            txtOutput.Text += "\n RUN Accurate rate: " + runAcc.ToString() + "/" + testRunSize + "(" + (runAcc / testRunSize).ToString() + ")";
+            txtOutput.Text += "\n WALK Accurate rate: " + walkAcc.ToString() + "/" + testWalkSize + "(" + (walkAcc / testWalkSize).ToString() + ")";
+            txtOutput.Text += "\n JUMP Accurate rate: " + jumpAcc.ToString() + "/" + testJumpSize + "(" + (jumpAcc / testJumpSize).ToString() + ")";
+            txtOutput.Text += "\n DANCE Accurate rate: " + danceAcc.ToString() + "/" + testDanceSize + "(" + (danceAcc / testDanceSize).ToString() + ")";
             txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
             txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
             Cursor.Current = Cursors.Default;

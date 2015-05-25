@@ -35,7 +35,7 @@ namespace Main.FeatureExtraction
             IKernel kernel = new Linear();
             // Then, we will create a KDA using this linear kernel.
             kda = new KernelDiscriminantAnalysis(inputs.ToMatrix(), outputs, kernel);
-            kda.Regularization = 0.001;
+            kda.Regularization = 0.01;
             kda.Compute(); // Compute the analysis
         }
         public double[][] transform(double[][] inputs)
