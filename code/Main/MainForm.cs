@@ -468,5 +468,76 @@ namespace Main
             txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
             Cursor.Current = Cursors.Default;
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            txtOutput.Text = "RUNNING...";
+            readParams();
+            // Set numberFrame = 0 to read all frames.
+            numberFrame = 0;
+            int symbols = 5;
+            int state = 5;
+            double tolerance = 0.0001;
+            symbols = int.Parse(txtSymbol.Text);
+            state = int.Parse(txtState.Text);
+            tolerance = double.Parse(txtTolerance.Text);
+            List<int> states = new List<int>();
+            for (int i = 0; i < numberClasses; i++)
+            {
+                states.Add(state);
+            }
+            // K-means
+            readData();
+            List<int[]> trainData = new List<int[]>();
+            List<int[]> testData = new List<int[]>();
+            int size = trainInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                KMeans kmeans = new KMeans(symbols, Distance.SquareEuclidean);
+                trainData.Add(kmeans.Compute(trainInputs[i]));
+            }
+            size = testInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                KMeans kmeans = new KMeans(symbols, Distance.SquareEuclidean);
+                testData.Add(kmeans.Compute(testInputs[i]));
+            }
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            // Nested models will have two states each
+            // Creates a new Hidden Markov Model Sequence Classifier with the given parameters
+            HiddenMarkovClassifier classifier = new HiddenMarkovClassifier(numberClasses, states.ToArray(), symbols);
+            // Create a new learning algorithm to train the sequence classifier
+            var teacher = new HiddenMarkovClassifierLearning(classifier,
+
+                // Train each model until the log-likelihood changes less than 0.001
+                modelIndex => new BaumWelchLearning(classifier.Models[modelIndex])
+                {
+                    Tolerance = tolerance,
+                    //Iterations = 0
+                }
+            );
+
+            // Train the sequence classifier using the algorithm
+            double likelihood = teacher.Run(trainData.ToArray(), trainOutputs.ToArray());
+            txtOutput.Text += "Finished training! Likelihood: " + likelihood.ToString();
+            size = testData.Count;
+            double acc = 0.0;
+            for (int i = 0; i < size; i++)
+            {
+                int result = classifier.Compute(testData[i]);
+                if (testOutputs[i] == result)
+                {
+                    acc += 1;
+                }
+                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
+            }
+            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            long seconds = (end - begin) / 1000;
+            double accRate = acc / size;
+            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
+            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
+            Cursor.Current = Cursors.Default;
+        }
     }
 }
