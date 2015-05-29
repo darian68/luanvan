@@ -29,18 +29,18 @@ namespace Main.FeatureExtraction
     class KLDA
     {
         private KernelDiscriminantAnalysis kda;
-        public KLDA(double[][] inputs, int[] outputs)
+        public KLDA(double[][] inputs, int[] outputs, double regular)
         {
              // use, such as a linear kernel function.
             IKernel kernel = new Linear();
             // Then, we will create a KDA using this linear kernel.
             kda = new KernelDiscriminantAnalysis(inputs.ToMatrix(), outputs, kernel);
-            kda.Regularization = 0.01;
+            kda.Regularization = regular; //0.01
             kda.Compute(); // Compute the analysis
         }
-        public double[][] transform(double[][] inputs)
+        public double[][] transform(double[][] inputs, int dimension)
         {
-            return kda.Transform(inputs.ToMatrix()).ToArray();
+            return kda.Transform(inputs.ToMatrix(), dimension).ToArray();
         }
         public int classify(double[] inputs)
         {

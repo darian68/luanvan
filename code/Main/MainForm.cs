@@ -268,9 +268,9 @@ namespace Main
                 testInputs2D.Add(Matrix.Concatenate(testInputs[i]));
             }
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            KLDA kda = new KLDA(inputs.ToArray(), trainOutputs.ToArray());
-            double[][] trainresult = kda.transform(inputs.ToArray());
-            double[][] testresult = kda.transform(testInputs2D.ToArray());
+            KLDA kda = new KLDA(inputs.ToArray(), trainOutputs.ToArray(), threshold);
+            double[][] trainresult = kda.transform(inputs.ToArray(), dimension);
+            double[][] testresult = kda.transform(testInputs2D.ToArray(), dimension);
             size = testInputs.Count;
             // KDA
             double acc = 0.0;
