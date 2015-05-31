@@ -48,6 +48,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.btnCombine = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnKPCA
@@ -56,7 +57,7 @@
             this.btnKPCA.Name = "btnKPCA";
             this.btnKPCA.Size = new System.Drawing.Size(90, 40);
             this.btnKPCA.TabIndex = 10;
-            this.btnKPCA.Text = "KPCA";
+            this.btnKPCA.Text = "PCA";
             this.btnKPCA.UseVisualStyleBackColor = true;
             this.btnKPCA.Click += new System.EventHandler(this.btnKPCA_Click);
             // 
@@ -74,7 +75,7 @@
             this.btnKDA.Name = "btnKDA";
             this.btnKDA.Size = new System.Drawing.Size(90, 40);
             this.btnKDA.TabIndex = 11;
-            this.btnKDA.Text = "KLDA";
+            this.btnKDA.Text = "LDA";
             this.btnKDA.UseVisualStyleBackColor = true;
             this.btnKDA.Click += new System.EventHandler(this.btnKLDA_Click);
             // 
@@ -112,7 +113,6 @@
             this.txtCom.Name = "txtCom";
             this.txtCom.Size = new System.Drawing.Size(58, 20);
             this.txtCom.TabIndex = 5;
-            this.txtCom.Text = "1.5";
             this.txtCom.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // txtThreshold
@@ -172,9 +172,9 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 278);
+            this.button1.Location = new System.Drawing.Point(7, 199);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(78, 31);
+            this.button1.Size = new System.Drawing.Size(90, 37);
             this.button1.TabIndex = 13;
             this.button1.Text = "HMM";
             this.button1.UseVisualStyleBackColor = true;
@@ -231,11 +231,22 @@
             this.label7.TabIndex = 4;
             this.label7.Text = "Tolerance";
             // 
+            // btnCombine
+            // 
+            this.btnCombine.Location = new System.Drawing.Point(7, 335);
+            this.btnCombine.Name = "btnCombine";
+            this.btnCombine.Size = new System.Drawing.Size(90, 31);
+            this.btnCombine.TabIndex = 15;
+            this.btnCombine.Text = "Combine";
+            this.btnCombine.UseVisualStyleBackColor = true;
+            this.btnCombine.Click += new System.EventHandler(this.btnCombine_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(610, 378);
+            this.Controls.Add(this.btnCombine);
             this.Controls.Add(this.txtTolerance);
             this.Controls.Add(this.txtState);
             this.Controls.Add(this.txtSymbol);
@@ -285,6 +296,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button btnCombine;
     }
 }
 

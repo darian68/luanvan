@@ -18,6 +18,7 @@ using Main.FeatureExtraction;
 using Accord.Statistics.Models.Markov;
 using Accord.Statistics.Models.Markov.Learning;
 using Accord.MachineLearning;
+using System.Threading;
 
 namespace Main
 {
@@ -148,19 +149,36 @@ namespace Main
                 }
             }
         }
-        private void btnKPCA_Click(object sender, EventArgs e)
+        private void showResult(int[] result, int[] expected)
         {
-            Cursor.Current = Cursors.WaitCursor;
-            txtOutput.Text = "RUNNING...";
-            readParams();
-            readData();
+            int size = result.Length;
+            double accurancy = 0.0;
+            int[] activitySize = new int[numberClasses];// 0: run, 1: walk, 2: jump, 3: dance
+            double[] activityAccuracy = new double[numberClasses];
+            for (int i = 0; i < size; i++)
+            {
+                activitySize[expected[i]]++;
+                if (expected[i] == result[i])
+                {
+                    accurancy += 1;
+                    activityAccuracy[expected[i]] += 1;
+                }
+                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + expected[i] + " - Actual: " + result[i].ToString();
+            }
+            for (int i = 0; i < numberClasses; i++)
+            {
+                txtOutput.Text += "\n Accurate rate: " + activityAccuracy[i].ToString() + "/" + activitySize[i] + "(" + (activityAccuracy[i] / activitySize[i]).ToString() + ")";
+            }
+            txtOutput.Text += "\n Total: " + accurancy.ToString() + "/" + size + "(" + (accurancy / size).ToString() + ")";
+        }
+        private int[] doPCA(int dimension, double threshold)
+        {
             List<double[]> inputs = new List<double[]>();
             int size = trainInputs.Count;
             for (int i = 0; i < size; i++)
             {
                 inputs.Add(Matrix.Concatenate(new KPCA().transform(trainInputs[i], dimension, threshold)));
             }
-            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             // Create a new Linear kernel
             IKernel kernel = new Linear();
             // Create a new Multi-class Support Vector Machine with one input,
@@ -185,76 +203,31 @@ namespace Main
             }
             // Run the learning algorithm
             double error = teacher.Run();
-            txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
+            //txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
             size = testInputs.Count;
-            int testRunSize = 0;
-            int testWalkSize = 0;
-            int testJumpSize = 0;
-            int testDanceSize = 0;
-            double acc = 0.0;
-            double runAcc = 0.0;
-            double walkAcc = 0.0;
-            double jumpAcc = 0.0;
-            double danceAcc = 0.0;
+            int[] result = new int[size];
             for (int i = 0; i < size; i++)
             {
-                if (testOutputs[i] == Activity.RUN)
-                {
-                    testRunSize += 1;
-                }
-                if (testOutputs[i] == Activity.WALK)
-                {
-                    testWalkSize += 1;
-                }
-                if (testOutputs[i] == Activity.JUMP)
-                {
-                    testJumpSize += 1;
-                }
-                if (testOutputs[i] == Activity.DANCE)
-                {
-                    testDanceSize += 1;
-                }
-                int result = machine.Compute(Matrix.Concatenate(new KPCA().transform(testInputs[i], dimension, threshold)));
-                if (testOutputs[i] == result)
-                {
-                    acc += 1;
-                    if (testOutputs[i] == Activity.RUN)
-                    {
-                        runAcc += 1;
-                    }
-                    if (testOutputs[i] == Activity.WALK)
-                    {
-                        walkAcc += 1;
-                    }
-                    if (testOutputs[i] == Activity.JUMP)
-                    {
-                        jumpAcc += 1;
-                    }
-                    if (testOutputs[i] == Activity.DANCE)
-                    {
-                        danceAcc += 1;
-                    }
-                }
-                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
+                result[i] = machine.Compute(Matrix.Concatenate(new KPCA().transform(testInputs[i], dimension, threshold)));
             }
-            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            long seconds = (end - begin) / 1000;
-            double accRate = acc / size;
-            txtOutput.Text += "\n RUN Accurate rate: " + runAcc.ToString() + "/" + testRunSize + "(" + (runAcc / testRunSize).ToString() + ")";
-            txtOutput.Text += "\n WALK Accurate rate: " + walkAcc.ToString() + "/" + testWalkSize + "(" + (walkAcc / testWalkSize).ToString() + ")";
-            txtOutput.Text += "\n JUMP Accurate rate: " + jumpAcc.ToString() + "/" + testJumpSize + "(" + (jumpAcc / testJumpSize).ToString() + ")";
-            txtOutput.Text += "\n DANCE Accurate rate: " + danceAcc.ToString() + "/" + testDanceSize + "(" + (danceAcc / testDanceSize).ToString() + ")";
-            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
-            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
-            Cursor.Current = Cursors.Default;
+            return result;
         }
-
-        private void btnKLDA_Click(object sender, EventArgs e)
+        private void btnKPCA_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
             txtOutput.Text = "RUNNING...";
             readParams();
             readData();
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            int[] result = doPCA(dimension, threshold);
+            showResult(result, testOutputs.ToArray());
+            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            long seconds = (end - begin) / 1000;
+            txtOutput.Text += "\n Total time: " + seconds.ToString() + " seconds";
+            Cursor.Current = Cursors.Default;
+        }
+        private int[] doLDA(int dimention, double threshold)
+        {
             List<double[]> inputs = new List<double[]>();
             List<double[]> testInputs2D = new List<double[]>();
             int size = trainInputs.Count;
@@ -267,29 +240,9 @@ namespace Main
             {
                 testInputs2D.Add(Matrix.Concatenate(testInputs[i]));
             }
-            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             KLDA kda = new KLDA(inputs.ToArray(), trainOutputs.ToArray(), threshold);
-            double[][] trainresult = kda.transform(inputs.ToArray(), dimension);
-            double[][] testresult = kda.transform(testInputs2D.ToArray(), dimension);
-            size = testInputs.Count;
-            // KDA
-            double acc = 0.0;
-            for (int i = 0; i < size; i++)
-            {
-                int result = kda.classify(Matrix.Concatenate(testInputs[i]));
-                if (testOutputs[i] == result)
-                {
-                    acc += 1;
-                }
-                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
-            }
-            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            long seconds = (end - begin) / 1000;
-            double accRate = acc / size;
-            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
-            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
-            // SVM after KDA
-            begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            double[][] trainresult = kda.transform(inputs.ToArray(), dimention);
+            double[][] testresult = kda.transform(testInputs2D.ToArray(), dimention);
             // Create a new Linear kernel
             IKernel kernel = new Linear();
             // Create a new Multi-class Support Vector Machine with one input,
@@ -303,67 +256,27 @@ namespace Main
                 new SequentialMinimalOptimization(svm, classInputs, classOutputs);
             // Run the learning algorithm
             double error = teacher.Run();
-            txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
+            //txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
             size = testresult.Length;
-            int testRunSize = 0;
-            int testWalkSize = 0;
-            int testJumpSize = 0;
-            int testDanceSize = 0;
-            acc = 0.0;
-            double runAcc = 0.0;
-            double walkAcc = 0.0;
-            double jumpAcc = 0.0;
-            double danceAcc = 0.0;
+            int[] result = new int[size];
             for (int i = 0; i < size; i++)
             {
-                if (testOutputs[i] == Activity.RUN)
-                {
-                    testRunSize += 1;
-                }
-                if (testOutputs[i] == Activity.WALK)
-                {
-                    testWalkSize += 1;
-                }
-                if (testOutputs[i] == Activity.JUMP)
-                {
-                    testJumpSize += 1;
-                }
-                if (testOutputs[i] == Activity.DANCE)
-                {
-                    testDanceSize += 1;
-                }
-                int result = machine.Compute(testresult[i]);
-                if (testOutputs[i] == result)
-                {
-                    acc += 1;
-                    if (testOutputs[i] == Activity.RUN)
-                    {
-                        runAcc += 1;
-                    }
-                    if (testOutputs[i] == Activity.WALK)
-                    {
-                        walkAcc += 1;
-                    }
-                    if (testOutputs[i] == Activity.JUMP)
-                    {
-                        jumpAcc += 1;
-                    }
-                    if (testOutputs[i] == Activity.DANCE)
-                    {
-                        danceAcc += 1;
-                    }
-                }
-                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
+                result[i] = machine.Compute(testresult[i]);
             }
-            end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            seconds = (end - begin) / 1000;
-            accRate = acc / size;
-            txtOutput.Text += "\n RUN Accurate rate: " + runAcc.ToString() + "/" + testRunSize + "(" + (runAcc / testRunSize).ToString() + ")";
-            txtOutput.Text += "\n WALK Accurate rate: " + walkAcc.ToString() + "/" + testWalkSize + "(" + (walkAcc / testWalkSize).ToString() + ")";
-            txtOutput.Text += "\n JUMP Accurate rate: " + jumpAcc.ToString() + "/" + testJumpSize + "(" + (jumpAcc / testJumpSize).ToString() + ")";
-            txtOutput.Text += "\n DANCE Accurate rate: " + danceAcc.ToString() + "/" + testDanceSize + "(" + (danceAcc / testDanceSize).ToString() + ")";
-            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
-            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
+            return result;
+        }
+        private void btnKLDA_Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            txtOutput.Text = "RUNNING...";
+            readParams();
+            readData();
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            int[] result = doLDA(dimension, threshold);
+            showResult(result, testOutputs.ToArray());
+            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            long seconds = (end - begin) / 1000;
+            txtOutput.Text += "\n Total time: " + seconds.ToString() + " seconds";
             Cursor.Current = Cursors.Default;
         }
 
@@ -399,21 +312,15 @@ namespace Main
             double error = teacher.Run();
             txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
             size = testInputs2D.Count;
-            double acc = 0.0;
+            int[] result = new int[size];
             for (int i = 0; i < size; i++)
             {
-                int result = machine.Compute(testInputs2D[i]);
-                if (testOutputs[i] == result)
-                {
-                    acc += 1;
-                }
-                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
+                result[i] = machine.Compute(testInputs2D[i]);
             }
+            showResult(result, testOutputs.ToArray());
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
-            double accRate = acc / size;
-            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
-            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
+            txtOutput.Text += "\n Total time: " + seconds.ToString() + " seconds";
             Cursor.Current = Cursors.Default;
         }
 
@@ -451,21 +358,15 @@ namespace Main
             double error = teacher.Run();
             txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
             size = testInputs2D.Count;
-            double acc = 0.0;
+            int[] result = new int[size];
             for (int i = 0; i < size; i++)
             {
-                int result = machine.Compute(testInputs2D[i]);
-                if (testOutputs[i] == result)
-                {
-                    acc += 1;
-                }
-                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
+                result[i] = machine.Compute(testInputs2D[i]);
             }
+            showResult(result, testOutputs.ToArray());
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
-            double accRate = acc / size;
-            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
-            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
+            txtOutput.Text += "\n Total time: " + seconds.ToString() + " seconds";
             Cursor.Current = Cursors.Default;
         }
 
@@ -522,22 +423,73 @@ namespace Main
             double likelihood = teacher.Run(trainData.ToArray(), trainOutputs.ToArray());
             txtOutput.Text += "Finished training! Likelihood: " + likelihood.ToString();
             size = testData.Count;
-            double acc = 0.0;
+            int[] result = new int[size];
             for (int i = 0; i < size; i++)
             {
-                int result = classifier.Compute(testData[i]);
-                if (testOutputs[i] == result)
-                {
-                    acc += 1;
-                }
-                txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + testOutputs[i] + " - Actual: " + result.ToString();
+                result[i] = classifier.Compute(testData[i]);
             }
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
-            double accRate = acc / size;
-            txtOutput.Text += "\n Accurate rate: " + acc.ToString() + "/" + size + "(" + accRate.ToString() + ")";
-            txtOutput.Text += "\n Training time: " + seconds.ToString() + " seconds";
+            txtOutput.Text += "\n Tottal time: " + seconds.ToString() + " seconds";
             Cursor.Current = Cursors.Default;
+        }
+        private int doCombine(int[] f, double[] w)
+        {
+            double[] p = new double[numberClasses];
+            int size = f.Length;
+            for (int i = 0; i < size; i++)
+            {
+                p[f[i]] += w[i];
+            }
+            double maxp = p.Max();
+            for (int i = 0; i < numberClasses; i++)
+            {
+                if (p[i] == maxp) return i;
+            }
+            return -1;
+        }
+        private void btnCombine_Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            txtOutput.Text = "RUNNING...";
+            readParams();
+            readData();
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            //0: PCA, 1: LDA, 
+            double[] w = new double[] {0.735, 0.794, 0.765 };
+            int size = testOutputs.Count;
+            Thread t1 = new Thread(new ThreadStart(PCAThread));
+            Thread t2 = new Thread(new ThreadStart(LDAThread));
+            Thread t3 = new Thread(new ThreadStart(AnotherThread));
+            t1.Start();
+            t2.Start();
+            t3.Start();
+            t1.Join();
+            t2.Join();
+            t3.Join();
+            int[] result = new int[size];
+            for (int i = 0; i < size; i++)
+            {
+                result[i] = doCombine(new int[] { PCAResult[i], LDAResult[i], anotherResult[i] }, w);
+            }
+            showResult(result, testOutputs.ToArray());
+            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            long seconds = (end - begin) / 1000;
+            txtOutput.Text += "\n Total time: " + seconds.ToString() + " seconds";
+            Cursor.Current = Cursors.Default;
+        }
+        int[] PCAResult, LDAResult, anotherResult;
+        private void PCAThread()
+        {
+            PCAResult = doPCA(4, 0.0001);
+        }
+        private void LDAThread()
+        {
+            LDAResult = doLDA(3, 0.1);
+        }
+        private void AnotherThread()
+        {
+            anotherResult = doLDA(2, 0.1);
         }
     }
 }
