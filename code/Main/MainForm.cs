@@ -452,6 +452,50 @@ namespace Main
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
             txtOutput.Text += "\n Tottal time: " + seconds.ToString() + " seconds";
+            // SVM =====================
+            List<double[]> trainDataD = new List<double[]>();
+            List<double[]> testDataD = new List<double[]>();
+            List<double> tmp = new List<double>();
+            for (int i = 0; i < trainData.Count; i++)
+            {
+                for (int j = 0; j < trainData[i].Length; j++)
+                {
+                    tmp.Add(trainData[i][j]);
+                }
+                trainDataD.Add(tmp.ToArray());
+                tmp = new List<double>();
+            }
+            tmp = new List<double>();
+            for (int i = 0; i < testData.Count; i++)
+            {
+                for (int j = 0; j < testData[i].Length; j++)
+                {
+                    tmp.Add(testData[i][j]);
+                }
+                testDataD.Add(tmp.ToArray());
+                tmp = new List<double>();
+            }
+            // Create a new Linear kernel
+            var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(1));
+            // Create a new Multi-class Support Vector Machine with one input,
+            //  using the linear kernel and for four disjoint classes.
+            var machine = new MulticlassSupportVectorMachine(trainData[0].Length, kernel, numberClasses);
+            // Create the Multi-class learning algorithm for the machine
+            var teacher1 = new MulticlassSupportVectorLearning(machine, trainDataD.ToArray(), trainOutputs.ToArray());
+            // Configure the learning algorithm to use SMO to train the
+            //  underlying SVMs in each of the binary class subproblems.
+            teacher1.Algorithm = (svm, classInputs, classOutputs, i, j) =>
+                new SequentialMinimalOptimization(svm, classInputs, classOutputs);
+            // Run the learning algorithm
+            double error = teacher1.Run();
+            txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
+            size = testData.Count;
+            int[] result1 = new int[size];
+            for (int i = 0; i < size; i++)
+            {
+                result1[i] = machine.Compute(testDataD[i]);
+            }
+            showResult(result1, testOutputs.ToArray());
             Cursor.Current = Cursors.Default;
         }
         private int doCombine(int[] f, double[] w)

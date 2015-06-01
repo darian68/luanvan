@@ -731,3 +731,4 @@ C:\GIT\luanvan\code\Main\bin\Debug\Accord.MachineLearning.xml
 C:\GIT\luanvan\code\Main\bin\Debug\Accord.Math.xml
 C:\GIT\luanvan\code\Main\bin\Debug\Accord.Statistics.xml
 C:\GIT\luanvan\code\Main\bin\Debug\AForge.Math.xml
+C:\GIT\luanvan\code\Main\obj\Debug\Main.csprojResolveAssemblyReference.cache
