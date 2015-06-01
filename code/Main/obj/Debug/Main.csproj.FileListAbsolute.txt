@@ -326,7 +326,6 @@ C:\GIT\luanvan\code\Main\bin\Debug\Accord.MachineLearning.pdb
 C:\GIT\luanvan\code\Main\bin\Debug\Accord.Math.pdb
 C:\GIT\luanvan\code\Main\bin\Debug\Accord.Statistics.pdb
 C:\GIT\luanvan\code\Main\bin\Debug\AForge.xml
-C:\GIT\luanvan\code\Main\obj\Debug\Main.csprojResolveAssemblyReference.cache
 C:\GIT\luanvan\code\Main\obj\Debug\Main.MainForm.resources
 C:\GIT\luanvan\code\Main\obj\Debug\Main.Properties.Resources.resources
 C:\GIT\luanvan\code\Main\obj\Debug\Main.csproj.GenerateResource.Cache

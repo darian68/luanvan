@@ -376,7 +376,7 @@ namespace Main
             txtOutput.Text = "RUNNING...";
             readParams();
             // Set numberFrame = 0 to read all frames.
-            numberFrame = 0;
+            //numberFrame = 0;
             int symbols = 5;
             int state = 5;
             double tolerance = 0.0001;
@@ -390,19 +390,39 @@ namespace Main
             }
             // K-means
             readData();
+            List<int> temp = new List<int>();
             List<int[]> trainData = new List<int[]>();
             List<int[]> testData = new List<int[]>();
+            List<double[]> kmeanData = new List<double[]>();
             int size = trainInputs.Count;
             for (int i = 0; i < size; i++)
             {
-                KMeans kmeans = new KMeans(symbols, Distance.SquareEuclidean);
-                trainData.Add(kmeans.Compute(trainInputs[i]));
+                for (int j = 0; j < trainInputs[i].Length; j++)
+                {
+                    kmeanData.Add(trainInputs[i][j]);
+                }
+            }
+            KMeans kmeans = new KMeans(symbols, Distance.SquareEuclidean);
+            kmeans.Tolerance = 0.0001;
+            int[] labels = kmeans.Compute(kmeanData.ToArray());
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < trainInputs[i].Length; j++)
+                {
+                    temp.Add(kmeans.Clusters.Nearest(trainInputs[i][j]));
+                }
+                trainData.Add(temp.ToArray());
+                temp = new List<int>();
             }
             size = testInputs.Count;
             for (int i = 0; i < size; i++)
             {
-                KMeans kmeans = new KMeans(symbols, Distance.SquareEuclidean);
-                testData.Add(kmeans.Compute(testInputs[i]));
+                for (int j = 0; j < testInputs[i].Length; j++)
+                {
+                    temp.Add(kmeans.Clusters.Nearest(testInputs[i][j]));
+                }
+                testData.Add(temp.ToArray());
+                temp = new List<int>();
             }
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             // Nested models will have two states each
@@ -428,6 +448,7 @@ namespace Main
             {
                 result[i] = classifier.Compute(testData[i]);
             }
+            showResult(result, testOutputs.ToArray());
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
             txtOutput.Text += "\n Tottal time: " + seconds.ToString() + " seconds";
