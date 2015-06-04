@@ -287,8 +287,12 @@ namespace Main
             readParams();
             readData();
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            int[] result = doLDA(dimension, threshold);
-            showResult(result, testOutputs.ToArray());
+            for (int i = 2; i < 200; i++)
+            {
+                int[] result = doLDA(i, threshold);
+                txtOutput.Text += "\n------------------------ " + i;
+                showResult(result, testOutputs.ToArray());
+            }
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
             txtOutput.Text += "\n Total time: " + seconds.ToString() + " seconds";
