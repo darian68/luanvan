@@ -10,19 +10,19 @@ namespace Main.FeatureExtraction
 {
     class KPCA
     {
-        public KPCA()
+        KernelPrincipalComponentAnalysis kpca;
+        public KPCA(double[][] sourceMatrix, double threshold)
         {
-
-        }
-        public double[][] transform(double[][] sourceMatrix, int dimension, double threshold) {
-            // KPCA
             // Create a new linear kernel
             IKernel kernel = new Linear();
             // Creates the Kernel Principal Component Analysis of the given data
-            var kpca = new KernelPrincipalComponentAnalysis(sourceMatrix.ToMatrix(), kernel);
+            kpca = new KernelPrincipalComponentAnalysis(sourceMatrix.ToMatrix(), kernel);
             kpca.Threshold = threshold; // 0.0001;
             // Compute the Kernel Principal Component Analysis
             kpca.Compute();
+        }
+        public double[][] transform(double[][] sourceMatrix, int dimension) {
+            // KPCA
             return kpca.Transform(sourceMatrix.ToMatrix(), dimension).ToArray();
         }
     }

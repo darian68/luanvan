@@ -49,6 +49,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.btnCombine = new System.Windows.Forms.Button();
+            this.btnPLS = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnKPCA
@@ -241,11 +242,22 @@
             this.btnCombine.UseVisualStyleBackColor = true;
             this.btnCombine.Click += new System.EventHandler(this.btnCombine_Click);
             // 
+            // btnPLS
+            // 
+            this.btnPLS.Location = new System.Drawing.Point(490, 302);
+            this.btnPLS.Name = "btnPLS";
+            this.btnPLS.Size = new System.Drawing.Size(91, 42);
+            this.btnPLS.TabIndex = 16;
+            this.btnPLS.Text = "PLS";
+            this.btnPLS.UseVisualStyleBackColor = true;
+            this.btnPLS.Click += new System.EventHandler(this.btnPLS_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(610, 378);
+            this.Controls.Add(this.btnPLS);
             this.Controls.Add(this.btnCombine);
             this.Controls.Add(this.txtTolerance);
             this.Controls.Add(this.txtState);
@@ -297,6 +309,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button btnCombine;
+        private System.Windows.Forms.Button btnPLS;
     }
 }
 

@@ -19,6 +19,8 @@ using Accord.Statistics.Models.Markov;
 using Accord.Statistics.Models.Markov.Learning;
 using Accord.MachineLearning;
 using System.Threading;
+using Accord.Statistics.Analysis;
+using Accord.Statistics.Models.Regression.Linear;
 
 namespace Main
 {
@@ -174,18 +176,27 @@ namespace Main
         private int[] doPCA(int dimension, double threshold)
         {
             List<double[]> inputs = new List<double[]>();
+            List<double[]> testInputs2D = new List<double[]>();
             int size = trainInputs.Count;
             for (int i = 0; i < size; i++)
             {
-                inputs.Add(Matrix.Concatenate(new KPCA().transform(trainInputs[i], dimension, threshold)));
+                inputs.Add(Matrix.Concatenate(trainInputs[i]));
             }
+            size = testInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                testInputs2D.Add(Matrix.Concatenate(testInputs[i]));
+            }
+            KPCA pca = new KPCA(inputs.ToArray(), threshold);
+            double[][] trainresult = pca.transform(inputs.ToArray(), dimension);
+            double[][] testresult = pca.transform(testInputs2D.ToArray(), dimension);
             // Create a new Linear kernel
             IKernel kernel = new Linear();
             // Create a new Multi-class Support Vector Machine with one input,
             //  using the linear kernel and for four disjoint classes.
-            var machine = new MulticlassSupportVectorMachine(inputs[0].Length, kernel, numberClasses);
+            var machine = new MulticlassSupportVectorMachine(trainresult[0].Length, kernel, numberClasses);
             // Create the Multi-class learning algorithm for the machine
-            var teacher = new MulticlassSupportVectorLearning(machine, inputs.ToArray(), trainOutputs.ToArray());
+            var teacher = new MulticlassSupportVectorLearning(machine, trainresult, trainOutputs.ToArray());
             // Configure the learning algorithm to use SMO to train the
             //  underlying SVMs in each of the binary class subproblems.
             if (txtCom.Text != string.Empty)
@@ -208,7 +219,7 @@ namespace Main
             int[] result = new int[size];
             for (int i = 0; i < size; i++)
             {
-                result[i] = machine.Compute(Matrix.Concatenate(new KPCA().transform(testInputs[i], dimension, threshold)));
+                result[i] = machine.Compute(testresult[i]);
             }
             return result;
         }
@@ -219,14 +230,18 @@ namespace Main
             readParams();
             readData();
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            int[] result = doPCA(dimension, threshold);
-            showResult(result, testOutputs.ToArray());
+            for (int i = 2; i < 51; i++)
+            {
+                int[] result = doPCA(i, threshold);
+                txtOutput.Text += "\n------------------------ " + i;
+                showResult(result, testOutputs.ToArray());
+            }
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
             txtOutput.Text += "\n Total time: " + seconds.ToString() + " seconds";
             Cursor.Current = Cursors.Default;
         }
-        private int[] doLDA(int dimention, double threshold)
+        private int[] doLDA(int dimension, double threshold)
         {
             List<double[]> inputs = new List<double[]>();
             List<double[]> testInputs2D = new List<double[]>();
@@ -241,8 +256,8 @@ namespace Main
                 testInputs2D.Add(Matrix.Concatenate(testInputs[i]));
             }
             KLDA kda = new KLDA(inputs.ToArray(), trainOutputs.ToArray(), threshold);
-            double[][] trainresult = kda.transform(inputs.ToArray(), dimention);
-            double[][] testresult = kda.transform(testInputs2D.ToArray(), dimention);
+            double[][] trainresult = kda.transform(inputs.ToArray(), dimension);
+            double[][] testresult = kda.transform(testInputs2D.ToArray(), dimension);
             // Create a new Linear kernel
             IKernel kernel = new Linear();
             // Create a new Multi-class Support Vector Machine with one input,
@@ -555,6 +570,75 @@ namespace Main
         private void AnotherThread()
         {
             anotherResult = doLDA(2, 0.1);
+        }
+
+        private void btnPLS_Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            txtOutput.Text = "RUNNING...";
+            readParams();
+            readData();
+            List<double[]> inputs = new List<double[]>();
+            List<double[]> testInputs2D = new List<double[]>();
+            int size = trainInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                inputs.Add(Matrix.Concatenate(trainInputs[i]));
+            }
+            size = testInputs.Count;
+            for (int i = 0; i < size; i++)
+            {
+                testInputs2D.Add(Matrix.Concatenate(testInputs[i]));
+            }
+            size = trainOutputs.Count;
+            List<double[]> trainOutputsD = new List<double[]>();
+            for (int i = 0; i < trainOutputs.Count; i++)
+            {
+                trainOutputsD.Add(new double[] { trainOutputs[i] });
+            }
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            PartialLeastSquaresAnalysis pls = new PartialLeastSquaresAnalysis(inputs.ToArray().ToMatrix(), trainOutputsD.ToArray().ToMatrix(),
+                AnalysisMethod.Center, PartialLeastSquaresAlgorithm.SIMPLS);
+            pls.Compute();
+            MultivariateLinearRegression regression = pls.CreateRegression();
+            List<double[]> trainresult = new List<double[]>();
+            for (int i = 0; i < inputs.Count; i++)
+            {
+                trainresult.Add(regression.Compute(inputs[i]));
+            }
+            List<double[]> testresult = new List<double[]>();
+            for (int i = 0; i < testInputs2D.Count; i++)
+            {
+                testresult.Add(regression.Compute(testInputs2D[i]));
+            }
+            //double[,] result1 = pls.Transform(inputs.ToArray().ToMatrix());
+            //double[,] trainresult = pls.Transform(inputs.ToArray().ToMatrix(), dimension);
+            //double[,] testresult = pls.Transform(testInputs2D.ToArray().ToMatrix(), dimension);
+            // Create a new Linear kernel
+            IKernel kernel = new Linear();
+            // Create a new Multi-class Support Vector Machine with one input,
+            //  using the linear kernel and for four disjoint classes.
+            var machine = new MulticlassSupportVectorMachine(trainresult[0].Length, kernel, numberClasses);
+            // Create the Multi-class learning algorithm for the machine
+            var teacher = new MulticlassSupportVectorLearning(machine, trainresult.ToArray(), trainOutputs.ToArray());
+            // Configure the learning algorithm to use SMO to train the
+            //  underlying SVMs in each of the binary class subproblems.
+            teacher.Algorithm = (svm, classInputs, classOutputs, i, j) =>
+                new SequentialMinimalOptimization(svm, classInputs, classOutputs);
+            // Run the learning algorithm
+            double error = teacher.Run();
+            //txtOutput.Text = "Finished training! Error ratio: " + error.ToString();
+            size = testresult.Count;
+            int[] result = new int[size];
+            for (int i = 0; i < size; i++)
+            {
+                result[i] = machine.Compute(testresult[i]);
+            }
+            showResult(result, testOutputs.ToArray());
+            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            long seconds = (end - begin) / 1000;
+            txtOutput.Text += "\n Total time: " + seconds.ToString() + " seconds";
+            Cursor.Current = Cursors.Default;
         }
     }
 }
