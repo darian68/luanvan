@@ -67,8 +67,10 @@ namespace Main
                 testInputs = new List<double[][]>();
                 trainOutputs = new List<int>();
                 testOutputs = new List<int>();
+                // all bones (29)
+                string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "rhumerus", "rradius", "rwrist", "rhand", "rfingers", "rthumb", "lclavicle", "lhumerus", "lradius", "lwrist", "lhand", "lfingers", "lthumb", "rfemur", "rtibia", "rfoot", "rtoes", "lfemur", "ltibia", "lfoot", "ltoes" };
                 // 23 bones
-                string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur", "rradius", "lradius", "rtibia", "ltibia", "lwrist", "rwrist", "lhand", "rhand", "lfoot", "rfoot" };
+                //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur", "rradius", "lradius", "rtibia", "ltibia", "lwrist", "rwrist", "lhand", "rhand", "lfoot", "rfoot" };
                 // 13 bones
                 //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax", "lowerneck", "upperneck", "head", "rclavicle", "lclavicle", "rhumerus", "lhumerus", "rfemur", "lfemur"};
                 // 7 bones
@@ -77,6 +79,8 @@ namespace Main
                 //string[] boneNames = new string[] { "root", "lowerback", "upperback", "thorax"};
                 // 3 bones
                 //string[] boneNames = new string[] { "root", "lowerback", "upperback"};
+                // 11 bones
+                //string[] boneNames = new string[] { "root", "rradius", "lradius", "rtibia", "ltibia", "lwrist", "rwrist", "lhand", "rhand", "lfoot", "rfoot" };
                 string pathRun = Path.Combine(outPutDirectory, "Acclaim\\training\\run");
                 string pathWalk = Path.Combine(outPutDirectory, "Acclaim\\training\\walk");
                 string pathJump = Path.Combine(outPutDirectory, "Acclaim\\training\\jump");
@@ -157,6 +161,7 @@ namespace Main
             double accurancy = 0.0;
             int[] activitySize = new int[numberClasses];// 0: run, 1: walk, 2: jump, 3: dance
             double[] activityAccuracy = new double[numberClasses];
+            double[,] scale = new double[numberClasses, numberClasses];
             for (int i = 0; i < size; i++)
             {
                 activitySize[expected[i]]++;
@@ -165,7 +170,15 @@ namespace Main
                     accurancy += 1;
                     activityAccuracy[expected[i]] += 1;
                 }
+                scale[expected[i], result[i]]++;
                 txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + expected[i] + " - Actual: " + result[i].ToString();
+            }
+            for (int i = 0; i < numberClasses; i++)
+            {
+                for (int j = 0; j < numberClasses; j++)
+                {
+                    txtOutput.Text += "\n Scale[" + i + "," + j + "] = " + scale[i, j] + "/" + activitySize[i]+ "("+(scale[i, j] / activitySize[i]).ToString()+")";
+                }
             }
             for (int i = 0; i < numberClasses; i++)
             {
@@ -230,12 +243,14 @@ namespace Main
             readParams();
             readData();
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            for (int i = 2; i < 51; i++)
+            /*for (int i = 1; i < 164; i++)
             {
                 int[] result = doPCA(i, threshold);
                 txtOutput.Text += "\n------------------------ " + i;
                 showResult(result, testOutputs.ToArray());
-            }
+            }*/
+            int[] result = doPCA(49, 0.0);
+            showResult(result, testOutputs.ToArray());
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
             txtOutput.Text += "\n Total time: " + seconds.ToString() + " seconds";
@@ -287,12 +302,14 @@ namespace Main
             readParams();
             readData();
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            for (int i = 2; i < 200; i++)
+            /*for (int i = 1; i < 164; i++)
             {
                 int[] result = doLDA(i, threshold);
                 txtOutput.Text += "\n------------------------ " + i;
                 showResult(result, testOutputs.ToArray());
-            }
+            }*/
+            int[] result = doLDA(138, 0.0);
+            showResult(result, testOutputs.ToArray());
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
             txtOutput.Text += "\n Total time: " + seconds.ToString() + " seconds";
@@ -343,12 +360,8 @@ namespace Main
             Cursor.Current = Cursors.Default;
         }
 
-        private void btnSVM_Click(object sender, EventArgs e)
+        private int[] doSVM()
         {
-            Cursor.Current = Cursors.WaitCursor;
-            txtOutput.Text = "RUNNING...";
-            readParams();
-            readData();
             List<double[]> inputs = new List<double[]>();
             List<double[]> testInputs2D = new List<double[]>();
             int size = trainInputs.Count;
@@ -361,7 +374,6 @@ namespace Main
             {
                 testInputs2D.Add(Matrix.Concatenate(testInputs[i]));
             }
-            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             // Create a new Linear kernel
             IKernel kernel = new Linear();
             // Create a new Multi-class Support Vector Machine with one input,
@@ -375,13 +387,23 @@ namespace Main
                 new SequentialMinimalOptimization(svm, classInputs, classOutputs);
             // Run the learning algorithm
             double error = teacher.Run();
-            txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
+            //txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
             size = testInputs2D.Count;
             int[] result = new int[size];
             for (int i = 0; i < size; i++)
             {
                 result[i] = machine.Compute(testInputs2D[i]);
             }
+            return result;
+        }
+        private void btnSVM_Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            txtOutput.Text = "RUNNING...";
+            readParams();
+            readData();
+            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            int[] result = doSVM();
             showResult(result, testOutputs.ToArray());
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             long seconds = (end - begin) / 1000;
@@ -539,8 +561,8 @@ namespace Main
             readParams();
             readData();
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            //0: PCA, 1: LDA, 
-            double[] w = new double[] {0.735, 0.794, 0.765 };
+            //0: SVM, 1: PCA, 2: LDA
+            double[] w = new double[] {0.83, 0.9, 0.86 };
             int size = testOutputs.Count;
             Thread t1 = new Thread(new ThreadStart(PCAThread));
             Thread t2 = new Thread(new ThreadStart(LDAThread));
@@ -554,7 +576,7 @@ namespace Main
             int[] result = new int[size];
             for (int i = 0; i < size; i++)
             {
-                result[i] = doCombine(new int[] { PCAResult[i], LDAResult[i], anotherResult[i] }, w);
+                result[i] = doCombine(new int[] { anotherResult[i], PCAResult[i], LDAResult[i]}, w);
             }
             showResult(result, testOutputs.ToArray());
             long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
@@ -565,15 +587,15 @@ namespace Main
         int[] PCAResult, LDAResult, anotherResult;
         private void PCAThread()
         {
-            PCAResult = doPCA(4, 0.0001);
+            PCAResult = doPCA(49, 0.0);
         }
         private void LDAThread()
         {
-            LDAResult = doLDA(3, 0.1);
+            LDAResult = doLDA(138, 0.0);
         }
         private void AnotherThread()
         {
-            anotherResult = doLDA(2, 0.1);
+            anotherResult = doSVM();
         }
 
         private void btnPLS_Click(object sender, EventArgs e)
