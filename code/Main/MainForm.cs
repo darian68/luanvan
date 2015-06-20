@@ -161,13 +161,18 @@ namespace Main
                 scale[expected[i], result[i]]++;
                 txtOutput.Text += "\n" + (i + 1).ToString() + "-Expected: " + expected[i] + " - Actual: " + result[i].ToString();
             }
+            txtOutput.Text += "\n Detail";
+            txtOutput.Text += "\n =============================================";
             for (int i = 0; i < numberClasses; i++)
             {
                 for (int j = 0; j < numberClasses; j++)
                 {
-                    txtOutput.Text += "\n Scale[" + i + "," + j + "] = " + scale[i, j] + "/" + activitySize[i]+ "("+(scale[i, j] / activitySize[i]).ToString()+")";
+                    txtOutput.Text += "\n Matrix[" + i + "," + j + "] = " + scale[i, j] + "/" + activitySize[i]+ "("+(scale[i, j] / activitySize[i]).ToString()+")";
                 }
+                txtOutput.Text += "\n -------------------------------";
             }
+            txtOutput.Text += "\n Summary";
+            txtOutput.Text += "\n =============================================";
             for (int i = 0; i < numberClasses; i++)
             {
                 txtOutput.Text += "\n Accurate rate: " + activityAccuracy[i].ToString() + "/" + activitySize[i] + "(" + (activityAccuracy[i] / activitySize[i]).ToString() + ")";
@@ -216,7 +221,7 @@ namespace Main
         private void btnKPCA_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            txtOutput.Text = "RUNNING...";
+            txtOutput.Text = "PCA...";
             readParams();
             readData();
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
@@ -274,7 +279,7 @@ namespace Main
         }
         private void btnKLDA_Click(object sender, EventArgs e)        {
             Cursor.Current = Cursors.WaitCursor;
-            txtOutput.Text = "RUNNING...";
+            txtOutput.Text = "LDA...";
             readParams();           readData();
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             /*for (int i = 1; i < 164; i++)
