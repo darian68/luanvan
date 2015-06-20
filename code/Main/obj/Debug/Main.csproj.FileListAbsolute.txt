@@ -1080,4 +1080,3 @@ D:\000-Thesis\01-Code\code\Main\obj\Debug\Main.Properties.Resources.resources
 D:\000-Thesis\01-Code\code\Main\obj\Debug\Main.csproj.GenerateResource.Cache
 D:\000-Thesis\01-Code\code\Main\obj\Debug\Main.exe
 D:\000-Thesis\01-Code\code\Main\obj\Debug\Main.pdb
-D:\000-Thesis\01-Code\code\Main\obj\Debug\Main.csprojResolveAssemblyReference.cache

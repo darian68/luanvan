@@ -562,7 +562,7 @@ namespace Main
             readData();
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             //0: SVM, 1: PCA, 2: LDA
-            double[] w = new double[] {0.83, 0.9, 0.86 };
+            double[] w = new double[] {0.86, 0.89, 0.96 };
             int size = testOutputs.Count;
             Thread t1 = new Thread(new ThreadStart(PCAThread));
             Thread t2 = new Thread(new ThreadStart(LDAThread));
