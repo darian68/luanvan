@@ -335,7 +335,7 @@ namespace Main
         private void btnSVM_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            txtOutput.Text = "RUNNING...";
+            txtOutput.Text = "SVM Only...";
             readParams();
             readData();
             long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
@@ -347,131 +347,6 @@ namespace Main
             Cursor.Current = Cursors.Default;
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            Cursor.Current = Cursors.WaitCursor;
-            txtOutput.Text = "RUNNING...";
-            readParams();
-            // Set numberFrame = 0 to read all frames.
-            //numberFrame = 0;
-            int symbols = 5;
-            int state = 5;
-            double tolerance = 0.0001;
-            List<int> states = new List<int>();
-            for (int i = 0; i < numberClasses; i++)
-            {
-                states.Add(state);
-            }
-            // K-means
-            readData();
-            List<int> temp = new List<int>();
-            List<int[]> trainData = new List<int[]>();
-            List<int[]> testData = new List<int[]>();
-            List<double[]> kmeanData = new List<double[]>();
-            int size = trainInputs.Count;
-            for (int i = 0; i < size; i++)
-            {
-                for (int j = 0; j < trainInputs[i].Length; j++)
-                {
-                    kmeanData.Add(trainInputs[i][j]);
-                }
-            }
-            KMeans kmeans = new KMeans(symbols, Distance.SquareEuclidean);
-            kmeans.Tolerance = 0.0001;
-            int[] labels = kmeans.Compute(kmeanData.ToArray());
-            for (int i = 0; i < size; i++)
-            {
-                for (int j = 0; j < trainInputs[i].Length; j++)
-                {
-                    temp.Add(kmeans.Clusters.Nearest(trainInputs[i][j]));
-                }
-                trainData.Add(temp.ToArray());
-                temp = new List<int>();
-            }
-            size = testInputs.Count;
-            for (int i = 0; i < size; i++)
-            {
-                for (int j = 0; j < testInputs[i].Length; j++)
-                {
-                    temp.Add(kmeans.Clusters.Nearest(testInputs[i][j]));
-                }
-                testData.Add(temp.ToArray());
-                temp = new List<int>();
-            }
-            long begin = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            // Nested models will have two states each
-            // Creates a new Hidden Markov Model Sequence Classifier with the given parameters
-            HiddenMarkovClassifier classifier = new HiddenMarkovClassifier(numberClasses, states.ToArray(), symbols);
-            // Create a new learning algorithm to train the sequence classifier
-            var teacher = new HiddenMarkovClassifierLearning(classifier,
-
-                // Train each model until the log-likelihood changes less than 0.001
-                modelIndex => new BaumWelchLearning(classifier.Models[modelIndex])
-                {
-                    Tolerance = tolerance,
-                    //Iterations = 0
-                }
-            );
-
-            // Train the sequence classifier using the algorithm
-            double likelihood = teacher.Run(trainData.ToArray(), trainOutputs.ToArray());
-            txtOutput.Text += "Finished training! Likelihood: " + likelihood.ToString();
-            size = testData.Count;
-            int[] result = new int[size];
-            for (int i = 0; i < size; i++)
-            {
-                result[i] = classifier.Compute(testData[i]);
-            }
-            showResult(result, testOutputs.ToArray());
-            long end = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-            long seconds = (end - begin) / 1000;
-            txtOutput.Text += "\n Tottal time: " + seconds.ToString() + " seconds";
-            // SVM =====================
-            List<double[]> trainDataD = new List<double[]>();
-            List<double[]> testDataD = new List<double[]>();
-            List<double> tmp = new List<double>();
-            for (int i = 0; i < trainData.Count; i++)
-            {
-                for (int j = 0; j < trainData[i].Length; j++)
-                {
-                    tmp.Add(trainData[i][j]);
-                }
-                trainDataD.Add(tmp.ToArray());
-                tmp = new List<double>();
-            }
-            tmp = new List<double>();
-            for (int i = 0; i < testData.Count; i++)
-            {
-                for (int j = 0; j < testData[i].Length; j++)
-                {
-                    tmp.Add(testData[i][j]);
-                }
-                testDataD.Add(tmp.ToArray());
-                tmp = new List<double>();
-            }
-            // Create a new Linear kernel
-            var kernel = new Gaussian<DynamicTimeWarping>(new DynamicTimeWarping(1));
-            // Create a new Multi-class Support Vector Machine with one input,
-            //  using the linear kernel and for four disjoint classes.
-            var machine = new MulticlassSupportVectorMachine(trainData[0].Length, kernel, numberClasses);
-            // Create the Multi-class learning algorithm for the machine
-            var teacher1 = new MulticlassSupportVectorLearning(machine, trainDataD.ToArray(), trainOutputs.ToArray());
-            // Configure the learning algorithm to use SMO to train the
-            //  underlying SVMs in each of the binary class subproblems.
-            teacher1.Algorithm = (svm, classInputs, classOutputs, i, j) =>
-                new SequentialMinimalOptimization(svm, classInputs, classOutputs);
-            // Run the learning algorithm
-            double error = teacher1.Run();
-            txtOutput.Text += "Finished training! Error ratio: " + error.ToString();
-            size = testData.Count;
-            int[] result1 = new int[size];
-            for (int i = 0; i < size; i++)
-            {
-                result1[i] = machine.Compute(testDataD[i]);
-            }
-            showResult(result1, testOutputs.ToArray());
-            Cursor.Current = Cursors.Default;
-        }
         private int doCombine(int[] f, double[] w)
         {
             double[] p = new double[numberClasses];
